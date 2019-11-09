@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "539818365480",
+    "firebase_url": "https://pickitup-d87a8.firebaseio.com",
+    "project_id": "pickitup-d87a8",
+    "storage_bucket": "pickitup-d87a8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:539818365480:android:08860b77149abf6a44db1d",
+        "android_client_info": {
+          "package_name": "com.pickitup"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "539818365480-kg4kss2s19jfinqu32otkum0vsphv0s6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAo_jO2TpIQtPTrGTK6kAZ4SN410qxRvkE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "539818365480-kg4kss2s19jfinqu32otkum0vsphv0s6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
