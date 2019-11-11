@@ -1,82 +1,84 @@
-import React, {useState} from 'react';
-import {Alert, Button, StyleSheet, Text, View, Image} from 'react-native';
-import Auth0 from 'react-native-auth0';
+import React, {useEffect} from 'react';
+import {createAppContainer} from 'react-navigation';
+import {createStackNavigator} from 'react-navigation-stack';
+import Home from './android/app/src/screens/Home';
+import Profile from './android/app/src/screens/Profile';
+import List from './android/app/src/screens/List';
+import {View, Text, Button} from 'react-native';
+// we will use these two screens later in our AppNavigator
+import {Provider} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
+import auth from '@react-native-firebase/auth';
+import store from './android/app/src/redux';
+import appActions from './android/app/src/redux/actions/app';
+import userActions from './android/app/src/redux/actions/user';
+import {
+  loginFB,
+  logoutFB,
+} from './android/app/src/redux/actions/userAsyncActions';
 
-var credentials = {
-  domain: 'dev-v0arz9b4.auth0.com',
-  clientId: 'HlEarWtEobv8CICyhofX9DjJzguN9coe',
-};
-const auth0 = new Auth0(credentials);
+let {setinitializing} = appActions;
+let {setUser} = userActions;
+
+const AppNavigator = createStackNavigator(
+  {
+    Home,
+    Profile,
+    List,
+  },
+  {
+    initialRouteName: 'Home',
+  },
+);
+
+// TODO implement navigation
+const AppContainer = createAppContainer(AppNavigator);
 
 function App() {
-  const [accessToken, setAccessToken] = useState(null);
-  const [userProfile, setUserProfile] = useState(null);
+  const dispatch = useDispatch();
+  const {user} = useSelector(state => state.user);
+  const {initializing} = useSelector(state => state.app);
 
-  async function getUserInfo(token) {
-    let userInfo = await auth0.auth.userInfo({token});
-    return userInfo;
-  }
-  async function _onLogin() {
-    let res = await auth0.webAuth.authorize({
-      scope: 'openid profile email',
-    });
-    setAccessToken(res.accessToken);
-    let info = await getUserInfo(res.accessToken);
-    setUserProfile(info);
+  // Handle user state changes
+  function onAuthStateChanged(user) {
+    dispatch(setUser(user));
+    if (initializing) {
+      dispatch(setinitializing(false));
+    }
   }
 
-  const _onLogout = () => {
-    auth0.webAuth
-      .clearSession({})
-      .then(() => {
-        Alert.alert('Logged out!');
-        setAccessToken(null);
-      })
-      .catch(error => {
-        console.log('Log out cancelled', error);
-      });
-  };
+  useEffect(() => {
+    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    return subscriber; // unsubscribe on unmount
+  }, []);
 
-  let loggedIn = accessToken === null ? false : true;
+  if (initializing) return null;
+
   return (
-    <View style={styles.container}>
-      {loggedIn && userProfile ? (
+    <View>
+      {!user ? (
         <View>
-          <Text style={styles.header}>Welcome, {userProfile.givenName} </Text>
-          <Image
-            style={styles.profileImg}
-            source={{uri: userProfile.picture}}
+          <Button
+            title={'Log in with Facebook'}
+            onPress={() => dispatch(loginFB())}
           />
         </View>
-      ) : null}
-      <Button
-        onPress={loggedIn ? _onLogout : _onLogin}
-        title={loggedIn ? 'Log Out' : 'Log In'}
-      />
+      ) : (
+        <View>
+          <Text>Welcome {user.email}</Text>
+          <Button title={'Log out'} onPress={() => dispatch(logoutFB())} />
+        </View>
+      )}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  header: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  profileImg: {
-    width: 70,
-    height: 70,
-    margin: 5,
-    alignSelf: 'center',
-    borderRadius: 150 / 2,
-    overflow: 'hidden',
-  },
-});
+function Wrapper(props) {
+  return (
+    <Provider store={store}>
+      <App {...props} />
+    </Provider>
+  );
+}
 
-export default App;
+export default Wrapper;

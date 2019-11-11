@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">PickItUp</string>
+    <string name="facebook_app_id">2360528307408223</string>
+    <string name="fb_login_protocol_scheme">fb2360528307408223</string>
 </resources>
