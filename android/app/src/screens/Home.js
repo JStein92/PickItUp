@@ -1,21 +1,32 @@
-import React, {Component} from 'react';
+import React from 'react';
 import {Button, View, Text} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
+import {logoutFB} from '../redux/actions/userAsyncActions';
 
-export default class Home extends Component {
+function Home(props) {
+  const dispatch = useDispatch();
+  const {user} = useSelector(state => state.user);
+
+  return (
+    <View>
+      <Text>Welcome {user.email}</Text>
+      <Button title={'Log out'} onPress={() => dispatch(logoutFB())} />
+
+      <Button
+        title="Add an Item"
+        onPress={() => props.navigation.navigate('Profile')}
+      />
+      <Button
+        title="List of Items"
+        color="green"
+        onPress={() => props.navigation.navigate('List')}
+      />
+    </View>
+  );
+}
+
+export default class HomeComponent extends React.Component {
   render() {
-    return (
-      <View>
-        <Text>Home Screen</Text>
-        <Button
-          title="Add an Item"
-          onPress={() => this.props.navigation.navigate('AddItem')}
-        />
-        <Button
-          title="List of Items"
-          color="green"
-          onPress={() => this.props.navigation.navigate('List')}
-        />
-      </View>
-    );
+    return <Home {...this.props} />;
   }
 }

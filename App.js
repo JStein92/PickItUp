@@ -1,47 +1,74 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {createAppContainer} from 'react-navigation';
 import {createStackNavigator} from 'react-navigation-stack';
 import Home from './android/app/src/screens/Home';
 import Profile from './android/app/src/screens/Profile';
 import List from './android/app/src/screens/List';
-import {View, Text, Button} from 'react-native';
 // we will use these two screens later in our AppNavigator
 import {Provider} from 'react-redux';
+import {
+  createMaterialTopTabNavigator,
+  MaterialTopTabBar,
+} from 'react-navigation-tabs';
+import store from './android/app/src/redux';
+
+import {Button, View, Text} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import auth from '@react-native-firebase/auth';
-import store from './android/app/src/redux';
 import appActions from './android/app/src/redux/actions/app';
 import userActions from './android/app/src/redux/actions/user';
 import {
   loginFB,
   logoutFB,
 } from './android/app/src/redux/actions/userAsyncActions';
+import yargsParser from 'yargs-parser';
 
 let {setinitializing} = appActions;
 let {setUser} = userActions;
 
-const AppNavigator = createStackNavigator(
+const TabBarComponent = props => <MaterialTopTabBar {...props} />;
+
+const NavHome = createMaterialTopTabNavigator(
   {
-    Home,
-    Profile,
-    List,
+    Home: {
+      screen: Home,
+      navigationOptions: () => ({
+        title: 'Home',
+      }),
+    },
+    List: {
+      screen: List,
+      navigationOptions: () => ({
+        title: 'Activity',
+      }),
+    },
+    Profile: {
+      screen: Profile,
+      navigationOptions: () => ({
+        title: 'Profile',
+      }),
+    },
   },
   {
-    initialRouteName: 'Home',
+    tabBarComponent: props => <TabBarComponent {...props} />,
+    tabBarOptions: {
+      style: {
+        backgroundColor: '#6b52ae',
+      },
+    },
   },
 );
 
-// TODO implement navigation
-const AppContainer = createAppContainer(AppNavigator);
+const AppContainer = createAppContainer(NavHome);
 
-function App() {
+function App(props) {
   const dispatch = useDispatch();
   const {user} = useSelector(state => state.user);
   const {initializing} = useSelector(state => state.app);
 
   // Handle user state changes
-  function onAuthStateChanged(user) {
-    dispatch(setUser(user));
+  function onAuthStateChanged(newUser) {
+    dispatch(setUser(newUser));
     if (initializing) {
       dispatch(setinitializing(false));
     }
@@ -52,25 +79,20 @@ function App() {
     return subscriber; // unsubscribe on unmount
   }, []);
 
-  if (initializing) return null;
+  if (initializing) return null; // TODO add loader
 
-  return (
-    <View>
-      {!user ? (
-        <View>
-          <Button
-            title={'Log in with Facebook'}
-            onPress={() => dispatch(loginFB())}
-          />
-        </View>
-      ) : (
-        <View>
-          <Text>Welcome {user.email}</Text>
-          <Button title={'Log out'} onPress={() => dispatch(logoutFB())} />
-        </View>
-      )}
-    </View>
-  );
+  if (user && user.email) {
+    return <AppContainer {...props} />;
+  } else {
+    return (
+      <View>
+        <Button
+          title={'Log in with Facebook'}
+          onPress={() => dispatch(loginFB())}
+        />
+      </View>
+    );
+  }
 }
 
 function Wrapper(props) {
