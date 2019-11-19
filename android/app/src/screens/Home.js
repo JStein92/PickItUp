@@ -47,11 +47,6 @@ export default function Home(props) {
   }, []);
 
   useEffect(() => {
-    getMakersInBounds();
-  }, [currentRegion]);
-
-  function getMakersInBounds() {
-    // TODO: Also call when new markers are added
     if (currentRegion) {
       let bounds = getBoundsByRegion(currentRegion);
 
@@ -68,7 +63,7 @@ export default function Home(props) {
       console.log('SETTING MARKERS IN BOUNDS');
       setMarkersInBounds(foundMarkers);
     }
-  }
+  }, [currentRegion, markers]);
 
   const handleSelectMarker = marker => {
     setSelectedMarker(marker);
