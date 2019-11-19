@@ -3,6 +3,7 @@ import {handleActions} from 'redux-actions';
 
 export const userInitialState = {
   user: {},
+  location: null,
 };
 
 const reducerMap = {
@@ -10,6 +11,12 @@ const reducerMap = {
     return {
       ...state,
       user: action.payload,
+    };
+  },
+  [actions.setLocation]: (state, action) => {
+    return {
+      ...state,
+      location: action.payload,
     };
   },
 };

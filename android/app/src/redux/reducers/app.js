@@ -3,6 +3,8 @@ import {handleActions} from 'redux-actions';
 
 export const appInitialState = {
   initializing: false,
+  currentImage: null,
+  showCamera: false,
 };
 
 const reducerMap = {
@@ -10,6 +12,18 @@ const reducerMap = {
     return {
       ...state,
       initializing: action.payload,
+    };
+  },
+  [actions.setCurrentImage]: (state, action) => {
+    return {
+      ...state,
+      currentImage: action.payload,
+    };
+  },
+  [actions.setShowCamera]: (state, action) => {
+    return {
+      ...state,
+      showCamera: action.payload,
     };
   },
 };

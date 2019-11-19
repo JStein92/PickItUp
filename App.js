@@ -1,7 +1,10 @@
+<script src="http://localhost:8097" />;
+
 import React, {useEffect, useState} from 'react';
 import {createAppContainer} from 'react-navigation';
 import {createStackNavigator} from 'react-navigation-stack';
 import Home from './android/app/src/screens/Home';
+import EditPost from './android/app/src/screens/EditPost';
 import Profile from './android/app/src/screens/Profile';
 import List from './android/app/src/screens/List';
 // we will use these two screens later in our AppNavigator
@@ -19,16 +22,15 @@ import appActions from './android/app/src/redux/actions/app';
 import userActions from './android/app/src/redux/actions/user';
 import {
   loginFB,
-  logoutFB,
+  addUser,
 } from './android/app/src/redux/actions/userAsyncActions';
-import yargsParser from 'yargs-parser';
 
 let {setinitializing} = appActions;
 let {setUser} = userActions;
 
 const TabBarComponent = props => <MaterialTopTabBar {...props} />;
 
-const NavHome = createMaterialTopTabNavigator(
+const NavStack = createMaterialTopTabNavigator(
   {
     Home: {
       screen: Home,
@@ -42,6 +44,7 @@ const NavHome = createMaterialTopTabNavigator(
         title: 'Activity',
       }),
     },
+
     Profile: {
       screen: Profile,
       navigationOptions: () => ({
@@ -59,7 +62,22 @@ const NavHome = createMaterialTopTabNavigator(
   },
 );
 
-const AppContainer = createAppContainer(NavHome);
+const RootStack = createStackNavigator(
+  {
+    NavStack: {
+      screen: NavStack,
+    },
+    EditPost: {
+      screen: EditPost,
+    },
+  },
+  {
+    mode: 'modal',
+    headerMode: 'none',
+  },
+);
+
+const AppContainer = createAppContainer(RootStack);
 
 function App(props) {
   const dispatch = useDispatch();

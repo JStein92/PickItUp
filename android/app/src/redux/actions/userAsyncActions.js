@@ -2,6 +2,10 @@ import {LoginManager, AccessToken} from 'react-native-fbsdk';
 import {firebase} from '@react-native-firebase/auth';
 import auth from '@react-native-firebase/auth';
 import appActions from './app';
+import firestore from '@react-native-firebase/firestore';
+import store from '../index';
+import {PermissionsAndroid} from 'react-native';
+import {throwError} from 'rxjs';
 
 export function logoutFB() {
   return async function(dispatch) {
@@ -9,10 +13,61 @@ export function logoutFB() {
   };
 }
 
+export function requestPermissions() {
+  return async function(dispatch) {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+        {
+          title: 'PickItUp needs permission to use your location',
+          message:
+            'PickItUp needs access to your location so we can show your trash pickups on the map!',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('You can use the camera');
+        return;
+      } else {
+        console.log('Camera permission denied');
+        throwError('Camera permission denied');
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
+}
+
+export function addOrUpdateUser() {
+  return async function(dispatch) {
+    let {user} = store.getState().user;
+    const ref = firestore()
+      .collection('users')
+      .doc(user.uid);
+    try {
+      await ref.set(
+        {
+          displayName: user.displayName,
+          email: user.email,
+          image: user.photoURL + '?height=400',
+          creationTime: user.metadata.creationTime,
+          lastSignInTime: user.metadata.lastSignInTime,
+        },
+        {merge: true},
+      );
+    } catch (err) {
+      console.warn('User could not be added', err);
+    }
+  };
+}
+
 export function loginFB() {
   return async function(dispatch) {
     let {setInitializing} = appActions;
     try {
+      dispatch(requestPermissions());
       dispatch(setInitializing(true));
 
       const result = await LoginManager.logInWithPermissions([
@@ -34,6 +89,7 @@ export function loginFB() {
         data.accessToken,
       );
       await firebase.auth().signInWithCredential(credential);
+      dispatch(addOrUpdateUser());
 
       dispatch(setInitializing(false));
     } catch (err) {
@@ -41,8 +97,6 @@ export function loginFB() {
     }
   };
 }
-
-//TODO add/update user data to firestore on log in
 
 // TODO allow registration with email
 const register = async (email, password) => {
