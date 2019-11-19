@@ -36,11 +36,7 @@ export default function EditPost(props) {
   return currentImage ? (
     <View style={styles.root}>
       <Text>Edit Post</Text>
-      <Image
-        source={{uri: currentImage.uri}}
-        width={Dimensions.get('window').width - 50}
-        resizeMode="contain"
-      />
+      <Image source={{uri: currentImage.uri}} width={300} height={300} />
       <Button title={'Retake'} onPress={() => retake()} />
       <Button title={'Cancel'} onPress={() => cancel()} />
       <Button title={'Post'} onPress={() => post()} />

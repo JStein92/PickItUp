@@ -142,6 +142,8 @@ export default function Map(props) {
           }}>
           {markers.map(marker => (
             <Marker
+              tracksInfoWindowChanges={false}
+              tracksViewChanges={false}
               centerOffset={{x: 10, y: 0}}
               ref={ref => (markerRefs[marker.id] = ref)}
               key={marker.id}
@@ -191,6 +193,13 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     borderWidth: 3,
     borderColor: 'green',
+  },
+  selectedMarkerImage: {
+    height: 38,
+    width: 38,
+    borderRadius: 100,
+    borderWidth: 3,
+    borderColor: 'purple',
   },
   profileImage: {
     height: 50,
