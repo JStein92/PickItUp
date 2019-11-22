@@ -9,8 +9,8 @@ import {View, StyleSheet, Text, Button, Image} from 'react-native';
 import userActions from '../redux/actions/user';
 let {setLocation} = userActions;
 import {useDispatch, useSelector} from 'react-redux';
-import RNLocation from 'react-native-location';
 import {TouchableOpacity} from 'react-native-gesture-handler';
+import Geolocation from 'react-native-geolocation-service';
 
 export default function Map(props) {
   let {
@@ -29,31 +29,32 @@ export default function Map(props) {
   const defaultZoom = 0.0015;
 
   useEffect(() => {
-    RNLocation.configure({
-      desiredAccuracy: {
-        ios: 'best',
-        android: 'highAccuracy',
+    Geolocation.getCurrentPosition(
+      position => {
+        console.log(position);
+        dispatch(
+          setLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            longitudeDelta: defaultZoom,
+            latitudeDelta: defaultZoom,
+          }),
+        );
       },
-      interval: 2000,
-      maxWaitTime: 2000,
-    });
-
-    RNLocation.getLatestLocation({timeout: 50000}).then(firstLocation => {
-      dispatch(
-        setLocation({
-          latitude: firstLocation.latitude,
-          longitude: firstLocation.longitude,
-          longitudeDelta: defaultZoom,
-          latitudeDelta: defaultZoom,
-        }),
-      );
-    });
+      error => {
+        // See error code charts below.
+        console.log(error.code, error.message);
+      },
+      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+    );
   }, []);
 
   useEffect(() => {
     if (selectedMarker && markerRefs[selectedMarker.id]) {
       markerRefs[selectedMarker.id].showCallout();
       const newRegion = selectedMarker.pickupData.location;
+      setFollowUserLocation(false);
+
       dispatch(
         setLocation({
           latitude: newRegion.latitude,
@@ -189,6 +190,9 @@ export default function Map(props) {
         <View style={styles.resetLocation}>
           <Button
             onPress={() => {
+              Object.values(markerRefs).forEach(ref => {
+                ref.hideCallout();
+              });
               setFollowUserLocation(true);
             }}
             title={'Me'}
