@@ -10,6 +10,8 @@ import {
   Image,
 } from 'react-native';
 import DoubleTap from '../components/DoubleTap';
+import moment from 'moment';
+
 export default function MarkerGallery(props) {
   const {markers, handleSelectMarker} = props;
   const [selectedMarker, setSelectedMarker] = useState({});
@@ -43,7 +45,9 @@ export default function MarkerGallery(props) {
             <Text style={styles.title}>{marker.pickupData.displayName}</Text>
           </View>
           <Text style={styles.title}>
-            {new Date(marker.pickupData.timestamp.nanoseconds * 1000).getDate()}
+            {moment
+              .unix(marker.pickupData.timestamp.seconds)
+              .format('MM/DD/YYYY')}
           </Text>
           <Image style={styles.image} source={{uri: marker.pickupData.image}} />
         </View>
