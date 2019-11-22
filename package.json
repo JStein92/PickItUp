@@ -24,7 +24,7 @@
     "react-feather": "^2.0.3",
     "react-native": "0.61.4",
     "react-native-auth0": "^2.1.0",
-    "react-native-camera": "^3.9.0",
+    "react-native-camera": "^3.11.1",
     "react-native-fbsdk": "^1.1.1",
     "react-native-gesture-handler": "^1.5.0",
     "react-native-location": "^2.5.0",

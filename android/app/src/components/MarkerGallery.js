@@ -23,7 +23,7 @@ export default function MarkerGallery(props) {
     return null;
   }
 
-  function Item({marker}) {
+  function Item({marker, index}) {
     return (
       <DoubleTap
         onPress={() => selectMarker(marker)}
@@ -31,20 +31,11 @@ export default function MarkerGallery(props) {
           props.navigation.navigate('PostDetails', {post: marker})
         }>
         <View
-          style={{
-            height: 60,
-            backgroundColor: '#e8e8e8',
-            width: Dimensions.get('screen').width,
-            display: 'flex',
-            justifyContent: 'space-between',
-            flexDirection: 'row',
-            alignItems: 'center',
-          }}>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}>
+          style={[
+            {backgroundColor: index % 2 === 0 ? '#657c87' : '#b3e4fc'},
+            styles.container,
+          ]}>
+          <View style={styles.containerInner}>
             <Image
               style={styles.userImage}
               source={{uri: marker.pickupData.photoURL}}
@@ -64,7 +55,7 @@ export default function MarkerGallery(props) {
     <View style={styles.markerListContainer}>
       <FlatList
         data={markers}
-        renderItem={({item}) => <Item marker={item} />}
+        renderItem={({item, index}) => <Item marker={item} index={index} />}
         keyExtractor={item => item.id}
         extraData={selectedMarker}
       />
@@ -74,9 +65,16 @@ export default function MarkerGallery(props) {
 
 const styles = StyleSheet.create({
   container: {
+    height: 60,
+    width: Dimensions.get('screen').width,
     display: 'flex',
-    flex: 1,
-    backgroundColor: 'white',
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  containerInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   image: {
     width: 60,

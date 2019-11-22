@@ -1,5 +1,7 @@
 # PickItUp (WIP Title)
 
+https://build.appcenter.ms/v0.1/apps/17e9c023-444e-4eed-8839-8598ff7a85ce/branches/master/badge
+
 ### Summary
 
 PickItUp is an social forward app that encourages users to pick up trash in their local community.

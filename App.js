@@ -57,7 +57,7 @@ const NavStack = createMaterialTopTabNavigator(
     tabBarComponent: props => <TabBarComponent {...props} />,
     tabBarOptions: {
       style: {
-        backgroundColor: '#6b52ae',
+        backgroundColor: '#1b3542',
       },
     },
   },

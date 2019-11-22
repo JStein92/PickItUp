@@ -161,7 +161,7 @@ export default function Map(props) {
                   justifyContent: 'center',
                   flexDirection: 'row',
                   width: 200,
-                  backgroundColor: 'white',
+                  backgroundColor: '#e6ebed',
                   alignContent: 'center',
                   height: 60,
                 }}
