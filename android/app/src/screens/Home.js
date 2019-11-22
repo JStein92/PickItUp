@@ -60,7 +60,6 @@ export default function Home(props) {
         );
       });
       // todo: check why this is being called when user is standing still
-      console.log('SETTING MARKERS IN BOUNDS');
       setMarkersInBounds(foundMarkers);
     }
   }, [currentRegion, markers]);

@@ -10,6 +10,7 @@ import {
 import {useDispatch, useSelector} from 'react-redux';
 import {RNCamera} from 'react-native-camera';
 import appActions from '../redux/actions/app';
+import ImagePicker from 'react-native-image-crop-picker';
 
 export default function CameraComponent(props) {
   let camera;
@@ -24,12 +25,29 @@ export default function CameraComponent(props) {
     }
   };
 
+  const cropData = {
+    offset: {x: 0, y: 0},
+    size: {width: 300, height: 300},
+    displaySize: {width: 300, height: 300},
+    resizeMode: 'cover',
+  };
+
   const takePicture = async () => {
-    const options = {quality: 0.5, base64: true};
+    const options = {quality: 0.5, base64: false};
     const data = await camera.takePictureAsync(options);
-    dispatch(appActions.setShowCamera(false));
-    dispatch(appActions.setCurrentImage(data));
-    props.navigation.navigate('EditPost');
+
+    ImagePicker.openCropper({
+      path: data.uri,
+      width: 300,
+      height: 300,
+      cropping: true,
+    }).then(image => {
+      console.log(image);
+      image.uri = image.path;
+      dispatch(appActions.setShowCamera(false));
+      dispatch(appActions.setCurrentImage(image));
+      props.navigation.navigate('EditPost');
+    });
   };
 
   // TODO add way to crop image
@@ -49,7 +67,6 @@ export default function CameraComponent(props) {
           alignItems: 'center',
         }}>
         <RNCamera
-          ratio="1:1"
           ref={ref => {
             camera = ref;
           }}
@@ -75,7 +92,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   preview: {
-    width: 300,
+    width: Dimensions.get('screen').width,
     height: 300,
     justifyContent: 'center',
     alignItems: 'center',
