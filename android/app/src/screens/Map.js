@@ -10,6 +10,7 @@ import userActions from '../redux/actions/user';
 let {setLocation} = userActions;
 import {useDispatch, useSelector} from 'react-redux';
 import RNLocation from 'react-native-location';
+import {TouchableOpacity} from 'react-native-gesture-handler';
 
 export default function Map(props) {
   let {
@@ -142,9 +143,11 @@ export default function Map(props) {
           }}>
           {markers.map(marker => (
             <Marker
+              onCalloutPress={() =>
+                props.navigation.navigate('PostDetails', {post: marker})
+              }
               tracksInfoWindowChanges={false}
               tracksViewChanges={false}
-              centerOffset={{x: 10, y: 0}}
               ref={ref => (markerRefs[marker.id] = ref)}
               key={marker.id}
               onPress={e => selectMarker(marker)}
@@ -152,14 +155,27 @@ export default function Map(props) {
                 latitude: marker.pickupData.location.latitude,
                 longitude: marker.pickupData.location.longitude,
               }}>
-              <Image
-                style={styles.markerImage}
-                source={{uri: marker.pickupData.image}}
-              />
               <Callout
-                style={{flex: 1, width: 125, height: 50, position: 'absolute'}}
+                style={{
+                  flex: 1,
+                  justifyContent: 'center',
+                  flexDirection: 'row',
+                  width: 200,
+                  backgroundColor: 'white',
+                  alignContent: 'center',
+                  height: 60,
+                }}
                 tooltip={true}>
-                <Button title={'View details'} />
+                <View
+                  style={{
+                    flex: 1,
+                    borderColor: 'black',
+                    borderWidth: 2,
+                    justifyContent: 'center',
+                    alignContent: 'center',
+                  }}>
+                  <Text style={{alignSelf: 'center'}}>Details</Text>
+                </View>
               </Callout>
               {/* TODO: Show modal here instead of native callout */}
             </Marker>

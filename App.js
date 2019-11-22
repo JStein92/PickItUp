@@ -5,6 +5,7 @@ import {createAppContainer} from 'react-navigation';
 import {createStackNavigator} from 'react-navigation-stack';
 import Home from './android/app/src/screens/Home';
 import EditPost from './android/app/src/screens/EditPost';
+import PostDetails from './android/app/src/screens/PostDetails';
 import Profile from './android/app/src/screens/Profile';
 import List from './android/app/src/screens/List';
 // we will use these two screens later in our AppNavigator
@@ -69,6 +70,9 @@ const RootStack = createStackNavigator(
     },
     EditPost: {
       screen: EditPost,
+    },
+    PostDetails: {
+      screen: PostDetails,
     },
   },
   {

@@ -84,6 +84,7 @@ export default function Home(props) {
       <MarkerGallery
         markers={markersInBounds}
         handleSelectMarker={handleSelectMarker}
+        {...props}
       />
       {/* TODO MAKE CAMERA COMPONENT A MODAL THAT DRAWS OVER MAP */}
       {showCamera ? <CameraComponent {...props} /> : null}
