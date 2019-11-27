@@ -1,7 +1,6 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {
   StyleSheet,
-  Button,
   TouchableOpacity,
   Text,
   Image,
@@ -14,16 +13,19 @@ import appActions from '../redux/actions/app';
 import Map from './Map';
 import firestore from '@react-native-firebase/firestore';
 import getBoundsByRegion from '../Util/getBoundsByRegion';
-import CameraComponent from '../components/Camera';
+import CameraComponent from './Camera';
 import MarkerGallery from '../components/MarkerGallery';
+import {Button} from 'react-native-elements';
+import Icon from 'react-native-vector-icons/dist/Feather';
+import {ThemeContext} from 'react-native-elements';
 
 export default function Home(props) {
-  const {showCamera} = useSelector(state => state.app);
   const dispatch = useDispatch();
   const [markers, setMarkers] = useState([]);
   const [markersInBounds, setMarkersInBounds] = useState([]);
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [currentRegion, setCurrentRegion] = useState(null);
+  const {theme} = useContext(ThemeContext);
 
   useEffect(() => {
     let doc = firestore().collection('pickups');
@@ -33,7 +35,10 @@ export default function Home(props) {
           // new markers is added, so we append it to the array
           let pickupData = change.doc.data();
           let newMarkers = markers;
-          let newMarker = {pickupData, id: change.doc.id};
+          let newMarker = {
+            pickupData,
+            id: change.doc.id,
+          };
           newMarkers.push(newMarker);
           let uniq = {};
           // For dev only - remove identical markers so hot module refresh doesn't show key value warnings
@@ -70,38 +75,27 @@ export default function Home(props) {
 
   return (
     <View style={styles.container}>
-      {!showCamera ? (
-        <Map
-          markers={markers}
-          selectedMarker={selectedMarker}
-          onRegionChangeComplete={newRegion => setCurrentRegion(newRegion)}
-          delesectMarkers={() => setSelectedMarker(null)}
-          currentRegion={currentRegion}
-          {...props}
-        />
-      ) : null}
+      <Map
+        markers={markers}
+        selectedMarker={selectedMarker}
+        onRegionChangeComplete={newRegion => setCurrentRegion(newRegion)}
+        delesectMarkers={() => setSelectedMarker(null)}
+        currentRegion={currentRegion}
+        {...props}
+      />
       <MarkerGallery
         markers={markersInBounds}
         handleSelectMarker={handleSelectMarker}
         {...props}
       />
-      {/* TODO MAKE CAMERA COMPONENT A MODAL THAT DRAWS OVER MAP */}
-      {showCamera ? <CameraComponent {...props} /> : null}
-      {!showCamera ? (
-        <View style={styles.bottomRightBtn}>
-          <Button
-            onPress={() => dispatch(appActions.setShowCamera(true))}
-            title={'Take pic'}
-          />
-        </View>
-      ) : (
-        <View style={styles.bottomLeftBtn}>
-          <Button
-            onPress={() => dispatch(appActions.setShowCamera(false))}
-            title={'Cancel'}
-          />
-        </View>
-      )}
+      <TouchableOpacity
+        onPress={() => props.navigation.navigate('Camera')}
+        style={[
+          styles.bottomRightBtn,
+          {backgroundColor: theme.colors.primary},
+        ]}>
+        <Icon name="camera" size={30} color={'white'} />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -116,16 +110,12 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
   },
-  markerListContainer: {
-    position: 'absolute',
-    backgroundColor: 'white',
-    maxHeight: 110,
-    bottom: 0,
-  },
   bottomRightBtn: {
-    bottom: 150,
+    bottom: 250,
     right: 10,
     position: 'absolute',
+    padding: 20,
+    borderRadius: 100,
   },
   bottomLeftBtn: {
     bottom: 10,

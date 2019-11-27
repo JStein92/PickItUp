@@ -1,11 +1,12 @@
 <script src="http://localhost:8097" />;
 
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import {createAppContainer} from 'react-navigation';
 import {createStackNavigator} from 'react-navigation-stack';
 import Home from './android/app/src/screens/Home';
 import EditPost from './android/app/src/screens/EditPost';
 import PostDetails from './android/app/src/screens/PostDetails';
+import Camera from './android/app/src/screens/Camera';
 import Profile from './android/app/src/screens/Profile';
 import List from './android/app/src/screens/List';
 // we will use these two screens later in our AppNavigator
@@ -15,20 +16,29 @@ import {
   MaterialTopTabBar,
 } from 'react-navigation-tabs';
 import store from './android/app/src/redux';
+import {Button} from 'react-native-elements';
 
-import {Button, View, Text} from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Platform,
+  UIManager,
+} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import auth from '@react-native-firebase/auth';
 import appActions from './android/app/src/redux/actions/app';
 import userActions from './android/app/src/redux/actions/user';
 import {
   loginFB,
+  loginGoogle,
   addUser,
 } from './android/app/src/redux/actions/userAsyncActions';
-
+import {ThemeProvider} from 'react-native-elements';
+import {GoogleSigninButton} from '@react-native-community/google-signin';
 let {setinitializing} = appActions;
 let {setUser} = userActions;
-
 const TabBarComponent = props => <MaterialTopTabBar {...props} />;
 
 const NavStack = createMaterialTopTabNavigator(
@@ -74,6 +84,9 @@ const RootStack = createStackNavigator(
     PostDetails: {
       screen: PostDetails,
     },
+    Camera: {
+      screen: Camera,
+    },
   },
   {
     mode: 'modal',
@@ -97,6 +110,12 @@ function App(props) {
   }
 
   useEffect(() => {
+    if (Platform.OS === 'android') {
+      if (UIManager.setLayoutAnimationEnabledExperimental) {
+        UIManager.setLayoutAnimationEnabledExperimental(true);
+      }
+    }
+
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
     return subscriber; // unsubscribe on unmount
   }, []);
@@ -107,20 +126,68 @@ function App(props) {
     return <AppContainer {...props} />;
   } else {
     return (
-      <View>
-        <Button
-          title={'Log in with Facebook'}
-          onPress={() => dispatch(loginFB())}
+      <View style={styles.container}>
+        <TouchableOpacity
+          style={[styles.loginButton, styles.facebookButton]}
+          onPress={() => dispatch(loginFB())}>
+          <Text style={{color: 'white', fontWeight: 'bold'}}>
+            Sign in with Facebook
+          </Text>
+        </TouchableOpacity>
+        <GoogleSigninButton
+          style={styles.loginButton}
+          color={GoogleSigninButton.Color.Dark}
+          onPress={() => dispatch(loginGoogle())}
+          disabled={false}
         />
       </View>
     );
   }
 }
 
+const styles = StyleSheet.create({
+  loginButton: {
+    height: 50,
+    width: 300,
+  },
+  facebookButton: {
+    color: 'white',
+    borderRadius: 3,
+    backgroundColor: '#4267B2',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 5,
+    elevation: 4,
+    height: 45,
+    width: 291,
+  },
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
+
+const theme = {
+  colors: {
+    primary: '#1a936f',
+    secondary: '#114b5f',
+    tertiary: '#f3e9d2',
+  },
+  Button: {
+    titleStyle: {
+      color: 'white',
+    },
+    raised: true,
+  },
+};
+
 function Wrapper(props) {
   return (
     <Provider store={store}>
-      <App {...props} />
+      <ThemeProvider theme={theme}>
+        <App {...props} />
+      </ThemeProvider>
     </Provider>
   );
 }

@@ -3,7 +3,6 @@ import {
   AppRegistry,
   StyleSheet,
   Text,
-  Button,
   Image,
   TouchableOpacity,
   View,
@@ -12,11 +11,11 @@ import {useDispatch, useSelector} from 'react-redux';
 import appActions from '../redux/actions/app';
 import {addOrUpdatePickup} from '../redux/actions/appAsyncActions';
 import {Dimensions} from 'react-native';
+import {Button} from 'react-native-elements';
+
 export default function PostDetails(props) {
   const {navigation} = props;
   let post = navigation.getParam('post');
-
-  console.log(post);
 
   return (
     <View style={styles.root}>

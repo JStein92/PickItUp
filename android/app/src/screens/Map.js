@@ -1,18 +1,18 @@
-import React, {useState, useEffect, forwardRef, useRef} from 'react';
-import MapView, {
-  PROVIDER_GOOGLE,
-  Marker,
-  Callout,
-  CalloutSubview,
-} from 'react-native-maps';
-import {View, StyleSheet, Text, Button, Image} from 'react-native';
+import React, {useState, useEffect, useContext} from 'react';
+import MapView, {PROVIDER_GOOGLE, Marker, Callout} from 'react-native-maps';
+import {View, StyleSheet, Text, Image} from 'react-native';
 import userActions from '../redux/actions/user';
 let {setLocation} = userActions;
 import {useDispatch, useSelector} from 'react-redux';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import Geolocation from 'react-native-geolocation-service';
+import {Button} from 'react-native-elements';
+import {ThemeContext} from 'react-native-elements';
+import Icon from 'react-native-vector-icons/dist/MaterialIcons';
 
 export default function Map(props) {
+  const {theme} = useContext(ThemeContext);
+
   let {
     onRegionChangeComplete,
     markers,
@@ -31,7 +31,6 @@ export default function Map(props) {
   useEffect(() => {
     Geolocation.getCurrentPosition(
       position => {
-        console.log(position);
         dispatch(
           setLocation({
             latitude: position.coords.latitude,
@@ -45,7 +44,11 @@ export default function Map(props) {
         // See error code charts below.
         console.log(error.code, error.message);
       },
-      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 10000,
+      },
     );
   }, []);
 
@@ -54,21 +57,12 @@ export default function Map(props) {
       markerRefs[selectedMarker.id].showCallout();
       const newRegion = selectedMarker.pickupData.location;
       setFollowUserLocation(false);
-
-      dispatch(
-        setLocation({
-          latitude: newRegion.latitude,
-          longitude: newRegion.longitude,
-          longitudeDelta: defaultZoom,
-          latitudeDelta: defaultZoom,
-        }),
-      );
       map.animateToRegion(
         {
           latitude: newRegion.latitude,
           longitude: newRegion.longitude,
-          latitudeDelta: currentRegion.latitudeDelta,
-          longitudeDelta: currentRegion.longitudeDelta,
+          latitudeDelta: defaultZoom,
+          longitudeDelta: defaultZoom,
         },
         100,
       );
@@ -106,6 +100,27 @@ export default function Map(props) {
     }
   }
 
+  function centerOnUser() {
+    Object.values(markerRefs).forEach(ref => {
+      ref.hideCallout();
+    });
+
+    Geolocation.getCurrentPosition(position => {
+      if (map) {
+        map.animateToRegion(
+          {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            latitudeDelta: defaultZoom,
+            longitudeDelta: defaultZoom,
+          },
+          50,
+        );
+      }
+      setFollowUserLocation(true);
+    });
+  }
+
   function onDrag() {
     setFollowUserLocation(false);
   }
@@ -136,6 +151,7 @@ export default function Map(props) {
           onRegionChangeComplete={onRegionChangeComplete}
           provider={PROVIDER_GOOGLE}
           style={styles.map}
+          showsCompass={true}
           initialRegion={{
             latitude: location.latitude,
             longitude: location.longitude,
@@ -156,27 +172,8 @@ export default function Map(props) {
                 latitude: marker.pickupData.location.latitude,
                 longitude: marker.pickupData.location.longitude,
               }}>
-              <Callout
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  flexDirection: 'row',
-                  width: 200,
-                  backgroundColor: '#e6ebed',
-                  alignContent: 'center',
-                  height: 60,
-                }}
-                tooltip={true}>
-                <View
-                  style={{
-                    flex: 1,
-                    borderColor: 'black',
-                    borderWidth: 2,
-                    justifyContent: 'center',
-                    alignContent: 'center',
-                  }}>
-                  <Text style={{alignSelf: 'center'}}>Details</Text>
-                </View>
+              <Callout tooltip={true} style={{width: 150}}>
+                <Button style={{width: 150}} title={'Details -> '} />
               </Callout>
               {/* TODO: Show modal here instead of native callout */}
             </Marker>
@@ -189,13 +186,19 @@ export default function Map(props) {
       {location && !followUserLocation ? (
         <View style={styles.resetLocation}>
           <Button
-            onPress={() => {
-              Object.values(markerRefs).forEach(ref => {
-                ref.hideCallout();
-              });
-              setFollowUserLocation(true);
+            buttonStyle={{
+              backgroundColor: 'rgba(144,144,144, .2)',
+              borderRadius: 100,
             }}
-            title={'Me'}
+            onPress={() => centerOnUser()}
+            icon={
+              <Icon
+                name="my-location"
+                size={25}
+                color={'black'}
+                style={{padding: 2}}
+              />
+            }
           />
         </View>
       ) : null}
@@ -227,11 +230,8 @@ const styles = StyleSheet.create({
   },
   resetLocation: {
     position: 'absolute',
-    width: 50,
-    height: 50,
-    right: 10,
-    top: 10,
-    opacity: 0.75,
+    right: 15,
+    top: 15,
   },
   map: {
     ...StyleSheet.absoluteFillObject,

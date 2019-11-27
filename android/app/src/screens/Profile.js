@@ -1,9 +1,10 @@
 import React from 'react';
-import {StyleSheet, Button, View, Text, Image} from 'react-native';
+import {StyleSheet, View, Text, Image} from 'react-native';
 import {logoutFB} from '../redux/actions/userAsyncActions';
 import {useDispatch, useSelector} from 'react-redux';
 import auth from '@react-native-firebase/auth';
 import {firebase} from '@react-native-firebase/auth';
+import {Button} from 'react-native-elements';
 
 const styles = StyleSheet.create({
   profileImage: {

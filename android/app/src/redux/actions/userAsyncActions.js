@@ -6,10 +6,45 @@ import firestore from '@react-native-firebase/firestore';
 import store from '../index';
 import {PermissionsAndroid} from 'react-native';
 import {throwError} from 'rxjs';
+import {GoogleSignin, statusCodes} from '@react-native-community/google-signin';
+
+let {setInitializing} = appActions;
 
 export function logoutFB() {
   return async function(dispatch) {
     firebase.auth().signOut();
+  };
+}
+
+export function loginGoogle() {
+  return async function(dispatch) {
+    try {
+      dispatch(requestPermissions());
+      dispatch(setInitializing(true));
+
+      await GoogleSignin.configure({
+        webClientId:
+          '539818365480-kg4kss2s19jfinqu32otkum0vsphv0s6.apps.googleusercontent.com',
+      });
+
+      const {accessToken, idToken} = await GoogleSignin.signIn();
+      const credential = firebase.auth.GoogleAuthProvider.credential(
+        idToken,
+        accessToken,
+      );
+      await firebase.auth().signInWithCredential(credential);
+      dispatch(addOrUpdateUser());
+      dispatch(setInitializing(false));
+    } catch (error) {
+      dispatch(setInitializing(false));
+      if (error.code === statusCodes.SIGN_IN_REQUIRED) {
+        // TODO: Error toast
+        // user has not signed in yet
+      } else {
+        // some other error
+        console.warn(error, 'google sign in failed');
+      }
+    }
   };
 }
 
@@ -65,7 +100,6 @@ export function addOrUpdateUser() {
 
 export function loginFB() {
   return async function(dispatch) {
-    let {setInitializing} = appActions;
     try {
       dispatch(requestPermissions());
       dispatch(setInitializing(true));
@@ -99,7 +133,7 @@ export function loginFB() {
 }
 
 // TODO allow registration with email
-const register = async (email, password) => {
+const registerWithEmail = async (email, password) => {
   try {
     await auth().createUserWithEmailAndPassword(email, password);
   } catch (e) {
