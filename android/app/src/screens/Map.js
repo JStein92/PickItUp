@@ -139,7 +139,7 @@ export default function Map(props) {
       {location ? (
         <MapView
           showsUserLocation
-          showsMyLocationButton={true}
+          showsMyLocationButton={false}
           loadingEnabled
           onUserLocationChange={event =>
             followUserLocation && userLocationChanged(event)
@@ -189,6 +189,7 @@ export default function Map(props) {
             buttonStyle={{
               backgroundColor: 'rgba(144,144,144, .2)',
               borderRadius: 100,
+              elevation: 1,
             }}
             onPress={() => centerOnUser()}
             icon={

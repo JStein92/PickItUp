@@ -91,8 +91,8 @@ export default function Home(props) {
       <TouchableOpacity
         onPress={() => props.navigation.navigate('Camera')}
         style={[
-          styles.bottomRightBtn,
           {backgroundColor: theme.colors.primary},
+          styles.bottomRightBtn,
         ]}>
         <Icon name="camera" size={30} color={'white'} />
       </TouchableOpacity>
@@ -111,10 +111,12 @@ const styles = StyleSheet.create({
     height: 48,
   },
   bottomRightBtn: {
-    bottom: 250,
+    bottom: '40%',
     right: 10,
     position: 'absolute',
     padding: 20,
+    borderWidth: 2,
+    borderColor: 'rgba(0,0,0, .8)',
     borderRadius: 100,
   },
   bottomLeftBtn: {

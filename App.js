@@ -4,7 +4,7 @@ import React, {useEffect} from 'react';
 import {createAppContainer} from 'react-navigation';
 import {createStackNavigator} from 'react-navigation-stack';
 import Home from './android/app/src/screens/Home';
-import EditPost from './android/app/src/screens/EditPost';
+import EditPost, {EditPostDetails} from './android/app/src/screens/EditPost';
 import PostDetails from './android/app/src/screens/PostDetails';
 import Camera from './android/app/src/screens/Camera';
 import Profile from './android/app/src/screens/Profile';
@@ -80,6 +80,9 @@ const RootStack = createStackNavigator(
     },
     EditPost: {
       screen: EditPost,
+    },
+    EditPostDetails: {
+      screen: EditPostDetails,
     },
     PostDetails: {
       screen: PostDetails,
