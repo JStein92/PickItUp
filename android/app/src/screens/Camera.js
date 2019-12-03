@@ -13,6 +13,7 @@ import ImagePicker from 'react-native-image-crop-picker';
 import {Button} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/dist/Ionicons';
 import MatIcon from 'react-native-vector-icons/dist/MaterialIcons';
+import Geolocation from 'react-native-geolocation-service';
 
 export default function CameraComponent(props) {
   let camera;
@@ -28,23 +29,37 @@ export default function CameraComponent(props) {
   };
 
   const takePicture = async () => {
-    const options = {quality: 0.5, base64: false};
+    const options = {quality: 0.75, base64: false};
     const data = await camera.takePictureAsync(options);
 
-    try {
-      const image = await ImagePicker.openCropper({
-        path: data.uri,
-        width: 300,
-        height: 300,
-        cropping: true,
-      });
-      image.uri = image.path;
-      dispatch(appActions.setCurrentImage(image));
-      props.navigation.navigate('EditPost');
-    } catch (err) {
-      console.log('crop error', err);
-      // cancelling image crop throws an error, so we handle it here
-    }
+    Geolocation.getCurrentPosition(
+      async position => {
+        try {
+          const image = await ImagePicker.openCropper({
+            path: data.uri,
+            width: 300,
+            height: 300,
+            cropping: true,
+          });
+          image.uri = image.path;
+          image.location = position.coords;
+          dispatch(appActions.setCurrentImage(image));
+          props.navigation.navigate('EditPost');
+        } catch (err) {
+          console.log('crop error', err);
+          // cancelling image crop throws an error, so we handle it here
+        }
+      },
+      error => {
+        // See error code charts below.
+        console.log(error.code, error.message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 10000,
+      },
+    );
   };
 
   // TODO add way to crop image

@@ -14,8 +14,6 @@ export function addOrUpdatePickup() {
       .collection('pickups')
       .doc();
 
-    const {location} = store.getState().user;
-
     const ext = currentImage.uri.split('.').pop(); // Extract image extension
     const filename = `${uuid()}.${ext}`; // Generate unique name
 
@@ -89,9 +87,13 @@ export function addOrUpdatePickup() {
             displayName: user.displayName,
             photoURL: user.photoURL,
             id: user.uid,
+            description: currentImage.description,
+            types: currentImage.types,
+            amount: currentImage.amount,
+            flagged: currentImage.flagged,
             location: new firestore.GeoPoint(
-              location.latitude,
-              location.longitude,
+              currentImage.location.latitude,
+              currentImage.location.longitude,
             ),
           },
           {merge: true},

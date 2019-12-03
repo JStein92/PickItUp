@@ -7,6 +7,7 @@ import {
   TouchableHighlight,
   View,
   Dimensions,
+  ScrollView,
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import appActions from '../redux/actions/app';
@@ -35,10 +36,10 @@ function HeaderLeft({onPress}) {
     />
   );
 }
-function HeaderMiddle() {
+function HeaderMiddle({text}) {
   return (
     <Text style={{color: 'white', fontWeight: 'bold', fontSize: 18}}>
-      Edit Pickup
+      {text}
     </Text>
   );
 }
@@ -87,6 +88,7 @@ export function EditPostDetails(props) {
   const [selectedAmount, setSelectedAmount] = useState();
   const [flagged, setFlagged] = useState(false);
   const dispatch = useDispatch();
+  const {currentImage} = useSelector(state => state.app);
 
   const post = () => {
     props.navigation.navigate('Home');
@@ -105,6 +107,13 @@ export function EditPostDetails(props) {
       types = types.filter(trashType => type.label !== trashType.label);
     }
     setSelectedTypes(types);
+
+    dispatch(
+      appActions.setCurrentImage({
+        ...currentImage,
+        types: types,
+      }),
+    );
   };
 
   const trashTypeButtons = trashTypes.map(trashType => {
@@ -118,7 +127,7 @@ export function EditPostDetails(props) {
         checkedColor={trashType.color}
         onPress={() => addOrRemoveType(trashType)}
         containerStyle={{
-          width: Dimensions.get('screen').width * 0.45,
+          width: '40%',
           borderColor: selectedTypes.find(
             type => trashType.label === type.label,
           )
@@ -139,10 +148,10 @@ export function EditPostDetails(props) {
   });
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Header>
         <HeaderLeft onPress={back} />
-        <HeaderMiddle />
+        <HeaderMiddle text={'Edit Pickup Details'} />
       </Header>
 
       <Text
@@ -152,7 +161,7 @@ export function EditPostDetails(props) {
           marginHorizontal: 30,
           borderBottomWidth: 1,
         }}>
-        Trash Type
+        Pickup Type
       </Text>
 
       <View
@@ -175,7 +184,15 @@ export function EditPostDetails(props) {
       </Text>
 
       <ButtonGroup
-        onPress={amount => setSelectedAmount(amount)}
+        onPress={amount => {
+          setSelectedAmount(amount);
+          dispatch(
+            appActions.setCurrentImage({
+              ...currentImage,
+              amount: amount,
+            }),
+          );
+        }}
         selectedIndex={selectedAmount}
         buttons={trashAmountButtons}
         containerStyle={{height: 30}}
@@ -184,6 +201,9 @@ export function EditPostDetails(props) {
       <View>
         <CheckBox
           center
+          containerStyle={{
+            marginVertical: 20,
+          }}
           title={
             flagged
               ? 'Pickup is flagged - click to unflag'
@@ -196,19 +216,26 @@ export function EditPostDetails(props) {
             <MatCommunityIcon name="flag" size={30} color={'#ff9933'} />
           }
           checked={flagged}
-          onPress={() => setFlagged(!flagged)}
+          onPress={() => {
+            setFlagged(!flagged);
+            dispatch(
+              appActions.setCurrentImage({
+                ...currentImage,
+                flagged: !flagged,
+              }),
+            );
+          }}
         />
       </View>
 
       <View
         style={{
-          position: 'absolute',
-          bottom: 0,
-          width: Dimensions.get('screen').width,
+          justifyContent: 'center',
+          width: Dimensions.get('window').width,
         }}>
         <Button title={'All Done!'} onPress={post} />
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -230,8 +257,13 @@ export default function EditPost(props) {
     props.navigation.navigate('EditPostDetails');
   };
 
-  const onPress = () => {
-    console.log('press');
+  const onSubmitEditing = e => {
+    dispatch(
+      appActions.setCurrentImage({
+        ...currentImage,
+        description: e.nativeEvent.text,
+      }),
+    );
   };
 
   /*
@@ -245,10 +277,10 @@ export default function EditPost(props) {
   */
 
   return currentImage ? (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Header>
         <HeaderLeft onPress={cancel} />
-        <HeaderMiddle />
+        <HeaderMiddle text={'Edit Pickup'} />
       </Header>
       <View>
         <TouchableOpacity
@@ -262,23 +294,20 @@ export default function EditPost(props) {
           style={{alignSelf: 'center'}}
         />
       </View>
-
       <Input
-        onChangeText={onPress}
+        onEndEditing={e => onSubmitEditing(e)}
         label={'Say something about this pickup!'}
         placeholder={'Cleaning up my community!'}
         maxLength={144}
       />
-
       <View
         style={{
-          position: 'absolute',
-          bottom: 0,
-          width: Dimensions.get('screen').width,
+          justifyContent: 'center',
+          width: Dimensions.get('window').width,
         }}>
         <Button title={'Next'} onPress={next} />
       </View>
-    </View>
+    </ScrollView>
   ) : null;
 }
 

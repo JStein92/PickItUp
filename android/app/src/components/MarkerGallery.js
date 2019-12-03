@@ -2,109 +2,57 @@ import React, {useState, useContext} from 'react';
 import {
   StyleSheet,
   Text,
-  FlatList,
   Dimensions,
   View,
-  Animated,
-  Image,
   TouchableOpacity,
-  LayoutAnimation,
+  TouchableHighlight,
+  ScrollView,
 } from 'react-native';
-import DoubleTap from '../components/DoubleTap';
 import moment from 'moment';
-import {ThemeContext} from 'react-native-elements';
+import {ThemeContext, Icon, Image, Button} from 'react-native-elements';
+import appActions from '../redux/actions/app';
+import {useDispatch, useSelector} from 'react-redux';
+import FastImage from 'react-native-fast-image';
+
 export default function MarkerGallery(props) {
-  const {markers, handleSelectMarker} = props;
-  const [selectedMarker, setSelectedMarker] = useState({});
-  const [showGallery, setShowGallery] = useState(true);
-
-  function selectMarker(marker) {
-    setSelectedMarker(marker);
-    handleSelectMarker(marker);
-  }
-
+  const {selectedMarker} = useSelector(state => state.app);
   const {theme} = useContext(ThemeContext);
 
-  if (!markers.length) {
+  if (!selectedMarker) {
     return null;
   }
 
-  function Item({marker, index}) {
-    return (
-      <DoubleTap
-        onPress={() => selectMarker(marker)}
-        onDoubleTap={() =>
-          props.navigation.navigate('PostDetails', {post: marker})
-        }>
-        <View
-          style={[
-            {
-              backgroundColor:
-                index % 2 === 0 ? theme.colors.primary : theme.colors.secondary,
-            },
-
-            styles.container,
-          ]}>
-          <View style={styles.containerInner}>
-            <Image
-              style={styles.userImage}
-              source={{
-                uri: marker.pickupData.photoURL,
-              }}
-            />
-            <Text style={styles.text}>{marker.pickupData.displayName}</Text>
-          </View>
-          <Text style={styles.text}>
-            {moment
-              .unix(marker.pickupData.timestamp.seconds)
-              .format('MM/DD/YYYY')}
-          </Text>
-          <Image
-            style={styles.image}
-            source={{
-              uri: marker.pickupData.image,
-            }}
-          />
-        </View>
-      </DoubleTap>
-    );
-  }
-
   return (
-    <View
-      style={[styles.markerListContainer, {maxHeight: showGallery ? 220 : 38}]}>
-      <View
-        style={{
-          position: 'relative',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}>
-        <TouchableOpacity
-          style={{
-            elevation: 5,
-            position: 'absolute',
-            top: -20,
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: 35,
-            width: 35,
-            borderRadius: 100,
-            zIndex: 3,
-            backgroundColor: 'lightgrey',
+    <View style={styles.containerInner}>
+      <FastImage
+        style={styles.image}
+        source={{
+          uri: selectedMarker.pickupData.image,
+        }}
+      />
+      <View style={{}}>
+        <Text style={styles.text}>{selectedMarker.pickupData.displayName}</Text>
+        <Text style={styles.text}>{selectedMarker.pickupData.description}</Text>
+        <FastImage
+          style={styles.userImage}
+          source={{
+            uri: selectedMarker.pickupData.photoURL,
           }}
-          onPress={() => {
-            setShowGallery(!showGallery);
-            LayoutAnimation.configureNext(
-              LayoutAnimation.Presets.easeInEaseOut,
-            );
-          }}>
-          <Text>{showGallery ? 'V' : '^'}</Text>
-        </TouchableOpacity>
-        <FlatList
-          data={markers}
-          renderItem={({item, index}) => <Item marker={item} index={index} />}
-          keyExtractor={item => item.id}
-          extraData={selectedMarker}
+        />
+        <Text style={styles.text}>
+          {moment
+            .unix(selectedMarker.pickupData.timestamp.seconds)
+            .format('MM/DD/YYYY')}
+        </Text>
+      </View>
+      <View style={{alignSelf: 'center'}}>
+        <Button
+          title={'Details ->'}
+          onPress={() =>
+            props.navigation.navigate('PostDetails', {
+              post: selectedMarker,
+            })
+          }
         />
       </View>
     </View>
@@ -113,28 +61,31 @@ export default function MarkerGallery(props) {
 
 const styles = StyleSheet.create({
   text: {
-    color: 'white',
-  },
-  container: {
-    height: 61,
-    width: Dimensions.get('screen').width,
-    display: 'flex',
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    alignItems: 'center',
+    color: 'black',
+    fontWeight: 'bold',
   },
   containerInner: {
     flexDirection: 'row',
+    position: 'absolute',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    bottom: 0,
+    width: '100%',
+    backgroundColor: 'white',
+    height: '30%',
+    elevation: 10,
   },
   image: {
-    width: 60,
-    height: 61,
+    width: '45%',
+    height: '100%',
+    alignSelf: 'center',
+    elevation: 5,
   },
   userImage: {
-    width: 50,
+    width: 75,
     marginHorizontal: 5,
-    height: 50,
+    height: 75,
+    elevation: 4,
     borderRadius: 100,
   },
   markerListContainer: {
