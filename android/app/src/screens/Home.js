@@ -85,7 +85,8 @@ export default function Home(props) {
         onPress={() => props.navigation.navigate('Camera')}
         style={[
           {
-            backgroundColor: theme.colors.primary,
+            backgroundColor: theme.colors.secondary,
+            elevation: 10,
           },
           styles.bottomRightBtn,
         ]}>
@@ -110,8 +111,6 @@ const styles = StyleSheet.create({
     right: 10,
     position: 'absolute',
     padding: 20,
-    borderWidth: 2,
-    borderColor: 'rgba(0,0,0, .8)',
     borderRadius: 100,
   },
   bottomLeftBtn: {

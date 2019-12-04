@@ -104,8 +104,6 @@ export default function Map(props) {
 
   // TODO: CUSTOM MARKERS WITH FADEIN ANIMATION
 
-  console.log(markers.length);
-
   return (
     <Animated.View style={styles.container}>
       {location ? (
@@ -153,19 +151,12 @@ export default function Map(props) {
         <View style={styles.resetLocation}>
           <Button
             buttonStyle={{
-              backgroundColor: 'rgba(144,144,144, .2)',
+              backgroundColor: 'white',
               borderRadius: 100,
-              elevation: 1,
+              elevation: 2,
             }}
             onPress={() => centerOnUser()}
-            icon={
-              <Icon
-                name="my-location"
-                size={25}
-                color={'black'}
-                style={{padding: 2}}
-              />
-            }
+            icon={<Icon name="my-location" size={25} color={'black'} />}
           />
         </View>
       ) : null}
