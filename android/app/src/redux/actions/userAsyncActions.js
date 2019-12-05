@@ -53,7 +53,6 @@ export function requestPermissions() {
     try {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
         {
           title: 'PickItUp needs permission to use your location',
           message:
@@ -63,11 +62,9 @@ export function requestPermissions() {
         },
       );
       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('You can use the camera');
         return;
       } else {
-        console.log('Camera permission denied');
-        throwError('Camera permission denied');
+        throwError('Location permission denied');
       }
     } catch (err) {
       console.warn(err);

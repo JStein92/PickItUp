@@ -8,7 +8,7 @@ import EditPost, {EditPostDetails} from './android/app/src/screens/EditPost';
 import PostDetails from './android/app/src/screens/PostDetails';
 import Camera from './android/app/src/screens/Camera';
 import Profile from './android/app/src/screens/Profile';
-import List from './android/app/src/screens/List';
+import Activity from './android/app/src/screens/Activity';
 // we will use these two screens later in our AppNavigator
 import {Provider} from 'react-redux';
 import {
@@ -16,7 +16,6 @@ import {
   MaterialTopTabBar,
 } from 'react-navigation-tabs';
 import store from './android/app/src/redux';
-import {Button} from 'react-native-elements';
 
 import {
   View,
@@ -33,7 +32,6 @@ import userActions from './android/app/src/redux/actions/user';
 import {
   loginFB,
   loginGoogle,
-  addUser,
 } from './android/app/src/redux/actions/userAsyncActions';
 import {ThemeProvider} from 'react-native-elements';
 import {GoogleSigninButton} from '@react-native-community/google-signin';
@@ -49,8 +47,8 @@ const NavStack = createMaterialTopTabNavigator(
         title: 'Home',
       }),
     },
-    List: {
-      screen: List,
+    Activity: {
+      screen: Activity,
       navigationOptions: () => ({
         title: 'Activity',
       }),
@@ -176,6 +174,7 @@ const theme = {
     primary: '#1a936f',
     secondary: '#114b5f',
     tertiary: '#f3e9d2',
+    header: '#779cab',
   },
   Button: {
     titleStyle: {

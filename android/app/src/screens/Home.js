@@ -5,7 +5,7 @@ import appActions from '../redux/actions/app';
 import Map from './Map';
 import firestore from '@react-native-firebase/firestore';
 import getBoundsByRegion from '../Util/getBoundsByRegion';
-import MarkerGallery from '../components/MarkerGallery';
+import PickupCard from '../components/PickupCard';
 import Icon from 'react-native-vector-icons/dist/Feather';
 import {ThemeContext, Button} from 'react-native-elements';
 import MapMarker from '../components/MapMarker';
@@ -14,16 +14,16 @@ export default function Home(props) {
   const dispatch = useDispatch();
   const [markers, setMarkers] = useState([]);
   const [markerNodes, setMarkerNodes] = useState([]);
-  const [markersInBounds, setMarkersInBounds] = useState([]);
   const [currentRegion, setCurrentRegion] = useState(null);
   const {theme} = useContext(ThemeContext);
+  const {selectedMarker} = useSelector(state => state.app);
 
   useEffect(() => {
     let doc = firestore().collection('pickups');
 
     doc.onSnapshot(querySnapshot => {
       querySnapshot.docChanges().forEach(change => {
-        if (change.type === 'added') {
+        if (change.type === 'added' || change.type === 'removed') {
           // new markers is added, so we append it to the array
           let pickupData = change.doc.data();
           let newMarkers = markers;
@@ -80,7 +80,11 @@ export default function Home(props) {
         currentRegion={currentRegion}
         {...props}
       />
-      <MarkerGallery {...props} />
+      <PickupCard
+        {...props}
+        containerStyle={styles.pickupCardContainer}
+        pickup={selectedMarker}
+      />
       <TouchableOpacity
         onPress={() => props.navigation.navigate('Camera')}
         style={[
@@ -101,6 +105,15 @@ const styles = StyleSheet.create({
     display: 'flex',
     flex: 1,
     backgroundColor: 'white',
+  },
+  pickupCardContainer: {
+    flexDirection: 'row',
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    backgroundColor: 'white',
+    height: 200,
+    elevation: 15,
   },
   image: {
     width: 48,

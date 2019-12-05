@@ -1,31 +1,22 @@
-import React, {useState, useContext} from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  TouchableHighlight,
-} from 'react-native';
+import React from 'react';
+import {StyleSheet, Text, View} from 'react-native';
 import moment from 'moment';
-import {ThemeContext, Icon, Image, Button} from 'react-native-elements';
-import appActions from '../redux/actions/app';
-import {useDispatch, useSelector} from 'react-redux';
+import {Icon, Button} from 'react-native-elements';
 import FastImage from 'react-native-fast-image';
 
-export default function MarkerGallery(props) {
-  const {selectedMarker} = useSelector(state => state.app);
-  const {theme} = useContext(ThemeContext);
+export default function PickupCard(props) {
+  const {pickup, containerStyle} = props;
 
-  if (!selectedMarker) {
+  if (!pickup) {
     return null;
   }
 
   return (
-    <View style={styles.container}>
+    <View style={containerStyle}>
       <FastImage
         style={styles.image}
         source={{
-          uri: selectedMarker.pickupData.image,
+          uri: pickup.pickupData.image,
         }}
       />
       <View
@@ -44,16 +35,14 @@ export default function MarkerGallery(props) {
             <FastImage
               style={styles.userImage}
               source={{
-                uri: selectedMarker.pickupData.photoURL,
+                uri: pickup.pickupData.photoURL,
               }}
             />
             <View>
-              <Text style={styles.text}>
-                {selectedMarker.pickupData.displayName}
-              </Text>
+              <Text style={styles.text}>{pickup.pickupData.displayName}</Text>
               <Text style={styles.dateText}>
                 {moment
-                  .unix(selectedMarker.pickupData.timestamp.seconds)
+                  .unix(pickup.pickupData.timestamp.seconds)
                   .format('MM/DD/YYYY')}
               </Text>
             </View>
@@ -62,8 +51,8 @@ export default function MarkerGallery(props) {
           <Icon type="material-community" name={'heart-outline'} size={30} />
         </View>
         <View style={styles.trashTypes}>
-          {selectedMarker.pickupData.types
-            ? selectedMarker.pickupData.types.map(type => {
+          {pickup.pickupData.types
+            ? pickup.pickupData.types.map(type => {
                 return (
                   <Icon
                     key={type.label}
@@ -85,8 +74,8 @@ export default function MarkerGallery(props) {
         </View>
         <View style={styles.descriptionText}>
           <Text>
-            {selectedMarker.pickupData.description
-              ? `"${selectedMarker.pickupData.description}"`
+            {pickup.pickupData.description
+              ? `"${pickup.pickupData.description}"`
               : 'No description provided'}
           </Text>
         </View>
@@ -94,7 +83,7 @@ export default function MarkerGallery(props) {
           title={'View Details'}
           onPress={() =>
             props.navigation.navigate('PostDetails', {
-              post: selectedMarker,
+              post: pickup,
             })
           }
         />
@@ -118,17 +107,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
   },
-  container: {
-    flexDirection: 'row',
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    backgroundColor: 'white',
-    height: 200,
-    elevation: 15,
-  },
   image: {
-    height: 200,
+    height: '100%',
     width: 200,
     alignSelf: 'center',
     elevation: 5,
