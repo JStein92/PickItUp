@@ -28,11 +28,6 @@ export default function MapMarker(props) {
 
   return (
     <Marker
-      onCalloutPress={() =>
-        props.navigation.navigate('PostDetails', {
-          post: marker,
-        })
-      }
       tracksViewChanges={false}
       key={`${marker.id} ${isSelected}`}
       onPress={() => selectMarker(marker)}

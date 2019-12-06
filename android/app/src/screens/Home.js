@@ -80,11 +80,13 @@ export default function Home(props) {
         currentRegion={currentRegion}
         {...props}
       />
-      <PickupCard
-        {...props}
-        containerStyle={styles.pickupCardContainer}
-        pickup={selectedMarker}
-      />
+      {selectedMarker ? (
+        <PickupCard
+          {...props}
+          containerStyle={styles.pickupCardContainer}
+          pickup={selectedMarker}
+        />
+      ) : null}
       <TouchableOpacity
         onPress={() => props.navigation.navigate('Camera')}
         style={[

@@ -1,18 +1,37 @@
-import React from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {StyleSheet, Text, View, Animated, Easing} from 'react-native';
 import moment from 'moment';
 import {Icon, Button} from 'react-native-elements';
 import FastImage from 'react-native-fast-image';
 
 export default function PickupCard(props) {
   const {pickup, containerStyle} = props;
+  const [fadeAnim] = useState(new Animated.Value(0));
+  const [yValue] = useState(new Animated.ValueXY({x: 0, y: -300}));
 
-  if (!pickup) {
-    return null;
-  }
+  useEffect(() => {
+    Animated.timing(
+      // Animate value over time
+      fadeAnim, // The value to drive
+      {
+        duration: 600,
+        toValue: 1, // Animate to final value of 1
+      },
+    ).start(); // Start the animation
+    Animated.timing(
+      // Animate value over time
+      yValue, // The value to drive
+      {
+        duration: 250,
+        easing: Easing.quad,
+        toValue: 0, // Animate to final value of 1
+      },
+    ).start(); // Start the animation
+  }, []);
 
   return (
-    <View style={containerStyle}>
+    <Animated.View
+      style={[containerStyle, {opacity: fadeAnim, bottom: yValue.y}]}>
       <FastImage
         style={styles.image}
         source={{
@@ -88,7 +107,7 @@ export default function PickupCard(props) {
           }
         />
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
