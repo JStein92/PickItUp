@@ -4,15 +4,48 @@ import storage from '@react-native-firebase/storage';
 import store from '../index';
 import uuid from 'uuid/v4'; // Import UUID to generate UUID
 
+export function likePickup(id) {
+  return async function(dispatch) {
+    let {user} = store.getState().user;
+
+    try {
+      let doc = firestore()
+        .collection('pickups')
+        .doc(id);
+
+      await doc.get().then(snapshot => {
+        let data = snapshot.data();
+
+        if (data.likes && data.likes.find(like => like.uid === user.uid)) {
+          doc.update(
+            'likes',
+            firestore.FieldValue.arrayRemove({
+              displayName: user.displayName,
+              image: user.photoURL,
+              uid: user.uid,
+            }),
+          );
+        } else {
+          doc.update(
+            'likes',
+            firestore.FieldValue.arrayUnion({
+              displayName: user.displayName,
+              image: user.photoURL,
+              uid: user.uid,
+            }),
+          );
+        }
+      });
+    } catch (err) {
+      console.warn(err, 'pickup like failed');
+    }
+  };
+}
+
 export function addOrUpdatePickup() {
   return async function(dispatch) {
     let {user} = store.getState().user;
     let {currentImage} = store.getState().app;
-    const userPickupsRef = firestore()
-      .collection('users')
-      .doc(user.uid)
-      .collection('pickups')
-      .doc();
 
     const ext = currentImage.uri.split('.').pop(); // Extract image extension
     const filename = `${uuid()}.${ext}`; // Generate unique name
@@ -86,7 +119,8 @@ export function addOrUpdatePickup() {
             timestamp: firestore.Timestamp.fromDate(new Date(Date.now())),
             displayName: user.displayName,
             photoURL: user.photoURL,
-            id: user.uid,
+            id: globalKey,
+            uid: user.uid,
             description: currentImage.description,
             types: currentImage.types,
             amount: currentImage.amount,

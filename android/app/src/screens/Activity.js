@@ -90,7 +90,7 @@ export default function Activity(props) {
 
 const styles = StyleSheet.create({
   containerStyle: {
-    height: 200,
+    height: 150,
     flexDirection: 'row',
     width: '100%',
     backgroundColor: 'white',

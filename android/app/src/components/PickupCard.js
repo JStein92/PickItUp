@@ -1,13 +1,45 @@
 import React, {useState, useEffect} from 'react';
-import {StyleSheet, Text, View, Animated, Easing} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Animated,
+  Easing,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
 import moment from 'moment';
 import {Icon, Button} from 'react-native-elements';
 import FastImage from 'react-native-fast-image';
+import {likePickup} from '../redux/actions/appAsyncActions';
+import {useDispatch, useSelector} from 'react-redux';
+import firestore from '@react-native-firebase/firestore';
 
 export default function PickupCard(props) {
   const {pickup, containerStyle} = props;
   const [fadeAnim] = useState(new Animated.Value(0));
   const [yValue] = useState(new Animated.ValueXY({x: 0, y: -300}));
+  const dispatch = useDispatch();
+  const {user} = useSelector(state => state.user);
+
+  const [liked, setLiked] = useState(null);
+
+  const handleLikePickup = () => {
+    setLiked(!liked);
+    dispatch(likePickup(pickup.pickupData.id));
+  };
+
+  useEffect(() => {
+    setLiked(null);
+    let doc = firestore()
+      .collection('pickups')
+      .doc(pickup.pickupData.id);
+
+    doc.get().then(snapshot => {
+      let data = snapshot.data();
+      setLiked(data.likes && data.likes.find(like => like.uid === user.uid));
+    });
+  }, [pickup, user.uid]);
 
   useEffect(() => {
     Animated.timing(
@@ -33,41 +65,62 @@ export default function PickupCard(props) {
     <Animated.View
       style={[containerStyle, {opacity: fadeAnim, bottom: yValue.y}]}>
       <FastImage
-        style={styles.image}
+        style={[styles.image, {width: containerStyle.height}]}
         source={{
           uri: pickup.pickupData.image,
         }}
       />
+      {liked !== null ? (
+        <Icon
+          type="material-community"
+          name={'heart'}
+          size={28}
+          onPress={handleLikePickup}
+          color={liked ? '#b23a48' : 'grey'}
+          underlayColor="rgba(0,0,0,0)"
+          containerStyle={styles.likedIcon}
+        />
+      ) : (
+        <View style={styles.likedIcon}>
+          <ActivityIndicator size="large" color="grey" />
+        </View>
+      )}
       <View
         style={{
           flex: 1,
-          padding: 5,
+          padding: 2,
           justifyContent: 'space-between',
         }}>
         <View
           style={{
-            justifyContent: 'space-between',
             flexDirection: 'row',
             alignItems: 'flex-start',
+            marginVertical: 3,
           }}>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <FastImage
-              style={styles.userImage}
-              source={{
-                uri: pickup.pickupData.photoURL,
-              }}
-            />
-            <View>
+          <FastImage
+            style={styles.userImage}
+            source={{
+              uri: pickup.pickupData.photoURL,
+            }}
+          />
+          <View style={{flex: 1}}>
+            <View style={{flexDirection: 'row'}}>
               <Text style={styles.text}>{pickup.pickupData.displayName}</Text>
-              <Text style={styles.dateText}>
-                {moment
-                  .unix(pickup.pickupData.timestamp.seconds)
-                  .format('MM/DD/YYYY')}
-              </Text>
             </View>
+            <Text style={styles.dateText}>
+              {moment
+                .unix(pickup.pickupData.timestamp.seconds)
+                .format('MM/DD/YYYY')}
+            </Text>
           </View>
-
-          <Icon type="material-community" name={'heart-outline'} size={30} />
+          <TouchableOpacity
+            onPress={() =>
+              props.navigation.navigate('PostDetails', {
+                post: pickup,
+              })
+            }>
+            <Icon type="material-community" name={'dots-vertical'} size={28} />
+          </TouchableOpacity>
         </View>
         <View style={styles.trashTypes}>
           {pickup.pickupData.types
@@ -82,9 +135,10 @@ export default function PickupCard(props) {
                       backgroundColor: 'white',
                       borderRadius: 100,
                       padding: 5,
-                      marginHorizontal: 5,
+                      marginVertical: 2,
+                      marginHorizontal: 3,
                     }}
-                    size={20}
+                    size={22}
                     color={type.color}
                   />
                 );
@@ -98,14 +152,6 @@ export default function PickupCard(props) {
               : 'No description provided'}
           </Text>
         </View>
-        <Button
-          title={'View Details'}
-          onPress={() =>
-            props.navigation.navigate('PostDetails', {
-              post: pickup,
-            })
-          }
-        />
       </View>
     </Animated.View>
   );
@@ -115,20 +161,36 @@ const styles = StyleSheet.create({
   text: {
     color: 'black',
     fontWeight: 'bold',
+    flexWrap: 'wrap',
+    flex: 1,
+  },
+  likedIcon: {
+    position: 'absolute',
+    top: 5,
+    left: 5,
+    borderRadius: 100,
+    padding: 5,
+    backgroundColor: 'white',
+    elevation: 6,
   },
   dateText: {
     color: 'grey',
   },
   descriptionText: {
-    justifyContent: 'center',
+    alignItems: 'flex-start',
+    marginTop: 5,
+    flex: 1,
+    flexWrap: 'wrap',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   trashTypes: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
+    flexWrap: 'wrap',
   },
   image: {
     height: '100%',
-    width: 200,
     alignSelf: 'center',
     elevation: 5,
   },

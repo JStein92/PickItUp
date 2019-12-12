@@ -86,6 +86,7 @@ export function addOrUpdateUser() {
           image: user.photoURL + '?height=400',
           creationTime: user.metadata.creationTime,
           lastSignInTime: user.metadata.lastSignInTime,
+          uid: user.uid,
         },
         {merge: true},
       );

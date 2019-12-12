@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: '100%',
     backgroundColor: 'white',
-    height: 200,
+    height: 150,
     elevation: 15,
   },
   image: {
