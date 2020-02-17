@@ -7,13 +7,20 @@ import {
   Easing,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import moment from 'moment';
 import {Icon, Button} from 'react-native-elements';
 import FastImage from 'react-native-fast-image';
-import {likePickup} from '../redux/actions/appAsyncActions';
+import {likePickup, deletePickup} from '../redux/actions/appAsyncActions';
 import {useDispatch, useSelector} from 'react-redux';
 import firestore from '@react-native-firebase/firestore';
+import {
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+} from 'react-native-popup-menu';
 
 export default function PickupCard(props) {
   const {pickup, containerStyle} = props;
@@ -29,6 +36,10 @@ export default function PickupCard(props) {
     dispatch(likePickup(pickup.pickupData.id));
   };
 
+  const handleDeletePickup = () => {
+    dispatch(deletePickup(pickup.pickupData.id));
+  };
+
   useEffect(() => {
     setLiked(null);
     let doc = firestore()
@@ -37,7 +48,9 @@ export default function PickupCard(props) {
 
     doc.get().then(snapshot => {
       let data = snapshot.data();
-      setLiked(data.likes && data.likes.find(like => like.uid === user.uid));
+      if (data) {
+        setLiked(data.likes && data.likes.find(like => like.uid === user.uid));
+      }
     });
   }, [pickup, user.uid]);
 
@@ -119,7 +132,49 @@ export default function PickupCard(props) {
                 post: pickup,
               })
             }>
-            <Icon type="material-community" name={'dots-vertical'} size={28} />
+            {/* <Icon type="material-community" name={'dots-vertical'} size={28} /> */}
+            <Menu>
+              <MenuTrigger text="..." customStyles={triggerStyles} />
+              <MenuOptions>
+                <MenuOption
+                  onSelect={() =>
+                    props.navigation.navigate('PostDetails', {
+                      post: pickup,
+                    })
+                  }
+                  text="Details"
+                />
+                {user.id !== pickup.uid ? (
+                  <MenuOption
+                    onSelect={() => alert(`Reported`)}
+                    text="Report"
+                  />
+                ) : null}
+                {user.id === pickup.uid ? (
+                  <MenuOption
+                    onSelect={() =>
+                      Alert.alert(
+                        'Really delete this pickup?',
+                        'You cannot undo this action',
+                        [
+                          {
+                            text: 'Cancel',
+                            onPress: () => {},
+                          },
+                          {
+                            text: 'Delete',
+                            onPress: handleDeletePickup,
+                            style: 'negative',
+                          },
+                        ],
+                        {cancelable: true},
+                      )
+                    }>
+                    <Text style={{color: 'red'}}>Delete</Text>
+                  </MenuOption>
+                ) : null}
+              </MenuOptions>
+            </Menu>
           </TouchableOpacity>
         </View>
         <View style={styles.trashTypes}>
@@ -156,6 +211,20 @@ export default function PickupCard(props) {
     </Animated.View>
   );
 }
+
+const triggerStyles = {
+  triggerText: {
+    color: 'black',
+    fontSize: 24,
+  },
+  triggerWrapper: {
+    padding: 5,
+    paddingTop: 0,
+  },
+  triggerTouchable: {
+    activeOpacity: 100,
+  },
+};
 
 const styles = StyleSheet.create({
   text: {

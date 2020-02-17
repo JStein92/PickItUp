@@ -17,29 +17,33 @@ export default function Home(props) {
   const [currentRegion, setCurrentRegion] = useState(null);
   const {theme} = useContext(ThemeContext);
   const {selectedMarker} = useSelector(state => state.app);
+  const pickupsRef = firestore().collection('pickups');
 
   useEffect(() => {
-    let doc = firestore().collection('pickups');
-
-    doc.onSnapshot(querySnapshot => {
+    return pickupsRef.onSnapshot(querySnapshot => {
+      let newMarkers = [];
       querySnapshot.docChanges().forEach(change => {
-        if (change.type === 'added' || change.type === 'removed') {
-          // new markers is added, so we append it to the array
-          let pickupData = change.doc.data();
-          let newMarkers = markers;
-          let newMarker = {
-            pickupData,
-            id: change.doc.id,
-          };
-          newMarkers.push(newMarker);
-          let uniq = {};
-          // For dev only - remove identical markers so hot module refresh doesn't show key value warnings
-          var arrFiltered = newMarkers.filter(
-            obj => !uniq[obj.id] && (uniq[obj.id] = true),
-          );
+        // new markers is added, so we append it to the array
+        let pickupData = change.doc.data();
+        let newMarker = {
+          pickupData,
+          id: change.doc.id,
+        };
 
-          setMarkers(arrFiltered);
+        if (change.type === 'removed') {
+          // remove from markers showing
+          newMarkers = newMarkers.filter(marker => marker.id !== newMarker.id);
+          dispatch(appActions.setSelectedMarker(null));
+        } else {
+          newMarkers.push(newMarker);
         }
+        dispatch(appActions.setSelectedMarker(null));
+        let uniq = {};
+        // For dev only - remove identical markers so hot module refresh doesn't show key value warnings
+        var arrFiltered = newMarkers.filter(
+          obj => !uniq[obj.id] && (uniq[obj.id] = true),
+        );
+        setMarkers(arrFiltered);
       });
     });
   }, []);

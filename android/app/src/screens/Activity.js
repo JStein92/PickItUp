@@ -3,7 +3,10 @@ import {View, Text, StyleSheet, ScrollView, Picker} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import PickupCard from '../components/PickupCard';
 import {Header, ThemeContext} from 'react-native-elements';
-
+let pickupsRef = firestore()
+  .collection('pickups')
+  .orderBy('timestamp', 'desc')
+  .limit(300);
 export default function Activity(props) {
   const [pickups, setPickups] = useState([]);
   const {theme} = useContext(ThemeContext);
@@ -12,27 +15,27 @@ export default function Activity(props) {
   const [sort, setSort] = useState(sortOpts[0]);
 
   useEffect(() => {
-    let doc = firestore()
-      .collection('pickups')
-      .orderBy('timestamp', 'desc')
-      .limit(300);
-
-    doc.onSnapshot(querySnapshot => {
+    pickupsRef.onSnapshot(querySnapshot => {
+      let newPickups = [];
       querySnapshot.docChanges().forEach(change => {
-        if (change.type === 'added' || change.type === 'removed') {
-          let pickupData = change.doc.data();
-          let newPickups = pickups;
-          let newPickup = {
-            pickupData,
-            id: change.doc.id,
-          };
+        let pickupData = change.doc.data();
+        let newPickup = {
+          pickupData,
+          id: change.doc.id,
+        };
+
+        if (change.type === 'removed') {
+          // remove from pickups showing
+          newPickups = newPickups.filter(pickup => pickup.id !== newPickup.id);
+        } else {
           newPickups.push(newPickup);
-          let uniq = {};
-          var arrFiltered = newPickups.filter(
-            obj => !uniq[obj.id] && (uniq[obj.id] = true),
-          );
-          sortPickups(arrFiltered, sort);
         }
+
+        let uniq = {};
+        var arrFiltered = newPickups.filter(
+          obj => !uniq[obj.id] && (uniq[obj.id] = true),
+        );
+        sortPickups(arrFiltered, sort);
       });
     });
   }, []);

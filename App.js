@@ -16,7 +16,7 @@ import {
   MaterialTopTabBar,
 } from 'react-navigation-tabs';
 import store from './android/app/src/redux';
-
+import {MenuProvider} from 'react-native-popup-menu';
 import {
   View,
   Text,
@@ -124,7 +124,11 @@ function App(props) {
   if (initializing) return null; // TODO add loader
 
   if (user && user.email) {
-    return <AppContainer {...props} />;
+    return (
+      <MenuProvider>
+        <AppContainer {...props} />
+      </MenuProvider>
+    );
   } else {
     return (
       <View style={styles.container}>

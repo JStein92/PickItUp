@@ -3,6 +3,7 @@ import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import store from '../index';
 import uuid from 'uuid/v4'; // Import UUID to generate UUID
+import {ToastAndroid} from 'react-native';
 
 export function likePickup(id) {
   return async function(dispatch) {
@@ -38,6 +39,24 @@ export function likePickup(id) {
       });
     } catch (err) {
       console.warn(err, 'pickup like failed');
+    }
+  };
+}
+
+export function deletePickup(id) {
+  return async function(dispatch) {
+    // let {user} = store.getState().user;
+
+    try {
+      firestore()
+        .collection('pickups')
+        .doc(id)
+        .delete()
+        .then(() => {
+          ToastAndroid.show('Pickup deleted!', ToastAndroid.SHORT);
+        });
+    } catch (err) {
+      console.warn('could not delete', err);
     }
   };
 }
