@@ -1,10 +1,7 @@
 import React, {useState} from 'react';
 import {
-  AppRegistry,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
-  TouchableHighlight,
   View,
   Dimensions,
   ScrollView,
@@ -13,37 +10,15 @@ import {useDispatch, useSelector} from 'react-redux';
 import appActions from '../redux/actions/app';
 import {addOrUpdatePickup} from '../redux/actions/appAsyncActions';
 import Image from 'react-native-scalable-image';
-import Ionicon from 'react-native-vector-icons/dist/Ionicons';
 import MatCommunityIcon from 'react-native-vector-icons/dist/MaterialCommunityIcons';
 import {
   Button,
-  Header,
   Input,
   ButtonGroup,
   CheckBox,
-  Icon,
   Text,
-  Divider,
 } from 'react-native-elements';
 import trashTypes from '../constants/trashTypes';
-
-function HeaderLeft({onPress}) {
-  return (
-    <Ionicon
-      name="md-arrow-round-back"
-      size={30}
-      style={{color: 'white'}}
-      onPress={onPress}
-    />
-  );
-}
-function HeaderMiddle({text}) {
-  return (
-    <Text style={{color: 'white', fontWeight: 'bold', fontSize: 18}}>
-      {text}
-    </Text>
-  );
-}
 
 export function EditPostDetails(props) {
   const trashAmounts = ['One piece', 'A few pieces', 'A whole bag'];
@@ -112,11 +87,6 @@ export function EditPostDetails(props) {
 
   return (
     <ScrollView style={styles.container}>
-      <Header>
-        <HeaderLeft onPress={back} />
-        <HeaderMiddle text={'Edit Pickup Details'} />
-      </Header>
-
       <Text
         style={{
           marginVertical: 10,
@@ -241,10 +211,6 @@ export default function EditPost(props) {
 
   return currentImage ? (
     <ScrollView style={styles.container}>
-      <Header>
-        <HeaderLeft onPress={cancel} />
-        <HeaderMiddle text={'Edit Pickup'} />
-      </Header>
       <View>
         <TouchableOpacity
           onPress={retake}

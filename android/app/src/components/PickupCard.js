@@ -6,21 +6,20 @@ import {
   Animated,
   Easing,
   TouchableOpacity,
-  ActivityIndicator,
   Alert,
 } from 'react-native';
 import moment from 'moment';
-import {Icon, Button} from 'react-native-elements';
+import {Icon} from 'react-native-elements';
 import FastImage from 'react-native-fast-image';
-import {likePickup, deletePickup} from '../redux/actions/appAsyncActions';
+import {deletePickup} from '../redux/actions/appAsyncActions';
 import {useDispatch, useSelector} from 'react-redux';
-import firestore from '@react-native-firebase/firestore';
 import {
   Menu,
   MenuOptions,
   MenuOption,
   MenuTrigger,
 } from 'react-native-popup-menu';
+import Like from './Like';
 
 export default function PickupCard(props) {
   const {pickup, containerStyle} = props;
@@ -29,30 +28,9 @@ export default function PickupCard(props) {
   const dispatch = useDispatch();
   const {user} = useSelector(state => state.user);
 
-  const [liked, setLiked] = useState(null);
-
-  const handleLikePickup = () => {
-    setLiked(!liked);
-    dispatch(likePickup(pickup.pickupData.id));
-  };
-
   const handleDeletePickup = () => {
     dispatch(deletePickup(pickup.pickupData.id));
   };
-
-  useEffect(() => {
-    setLiked(null);
-    let doc = firestore()
-      .collection('pickups')
-      .doc(pickup.pickupData.id);
-
-    doc.get().then(snapshot => {
-      let data = snapshot.data();
-      if (data) {
-        setLiked(data.likes && data.likes.find(like => like.uid === user.uid));
-      }
-    });
-  }, [pickup, user.uid]);
 
   useEffect(() => {
     Animated.timing(
@@ -81,23 +59,9 @@ export default function PickupCard(props) {
         style={[styles.image, {width: containerStyle.height}]}
         source={{
           uri: pickup.pickupData.image,
-        }}
-      />
-      {liked !== null ? (
-        <Icon
-          type="material-community"
-          name={'heart'}
-          size={28}
-          onPress={handleLikePickup}
-          color={liked ? '#b23a48' : 'grey'}
-          underlayColor="rgba(0,0,0,0)"
-          containerStyle={styles.likedIcon}
-        />
-      ) : (
-        <View style={styles.likedIcon}>
-          <ActivityIndicator size="large" color="grey" />
-        </View>
-      )}
+        }}>
+        <Like pickup={pickup} style={styles.likedIcon} />
+      </FastImage>
       <View
         style={{
           flex: 1,
@@ -116,6 +80,7 @@ export default function PickupCard(props) {
               uri: pickup.pickupData.photoURL,
             }}
           />
+
           <View style={{flex: 1}}>
             <View style={{flexDirection: 'row'}}>
               <Text style={styles.text}>{pickup.pickupData.displayName}</Text>
@@ -216,9 +181,12 @@ const triggerStyles = {
   triggerText: {
     color: 'black',
     fontSize: 24,
+    transform: [{rotate: '90deg'}],
+    transformOrigin: 'left top 0',
+    fontWeight: 'bold',
   },
   triggerWrapper: {
-    padding: 5,
+    paddingLeft: 10,
     paddingTop: 0,
   },
   triggerTouchable: {
@@ -237,7 +205,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 5,
     left: 5,
-    borderRadius: 100,
     padding: 5,
     backgroundColor: 'white',
     elevation: 6,

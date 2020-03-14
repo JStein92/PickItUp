@@ -75,23 +75,38 @@ const RootStack = createStackNavigator(
   {
     NavStack: {
       screen: NavStack,
+      navigationOptions: {
+        header: null,
+      },
     },
     EditPost: {
       screen: EditPost,
+      navigationOptions: {
+        title: 'Description',
+      },
     },
     EditPostDetails: {
       screen: EditPostDetails,
+      navigationOptions: {
+        title: 'Details',
+      },
     },
     PostDetails: {
       screen: PostDetails,
+      navigationOptions: {
+        title: 'Details',
+      },
     },
     Camera: {
       screen: Camera,
+      navigationOptions: {
+        title: 'Take Picture',
+      },
     },
   },
   {
     mode: 'modal',
-    headerMode: 'none',
+    headerMode: 'screen',
   },
 );
 

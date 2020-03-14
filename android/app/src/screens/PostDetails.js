@@ -12,14 +12,14 @@ import appActions from '../redux/actions/app';
 import {addOrUpdatePickup} from '../redux/actions/appAsyncActions';
 import {Dimensions} from 'react-native';
 import {Button} from 'react-native-elements';
-
+import moment from 'moment';
+import Like from '../components/Like';
 export default function PostDetails(props) {
   const {navigation} = props;
   let post = navigation.getParam('post');
 
   return (
     <View style={styles.root}>
-      <Text>Pickup Details!</Text>
       <View
         style={{
           display: 'flex',
@@ -30,20 +30,28 @@ export default function PostDetails(props) {
         <Image
           source={{uri: post.pickupData.photoURL}}
           style={{
-            height: 60,
-            width: 60,
+            height: 50,
+            width: 50,
             borderRadius: 100,
-            marginHorizontal: 5,
+            marginHorizontal: 20,
+            marginVertical: 10,
           }}
         />
-        <Text>Pickup by {post.pickupData.displayName}</Text>
+        <View>
+          <Text>{post.pickupData.displayName}</Text>
+          <Text>
+            {moment
+              .unix(post.pickupData.timestamp.seconds)
+              .format('MM/DD/YYYY')}
+          </Text>
+        </View>
       </View>
       <Image
         source={{uri: post.pickupData.image}}
-        style={{height: 200, width: 200}}
+        resizeMode="cover"
+        style={{width: null, height: 300}}
       />
-      <Button title={'Thanks!'} />
-      <Button title={'Back'} onPress={() => navigation.goBack()} />
+      <Like pickup={post} style={{marginVertical: 10, marginHorizontal: 10}} />
     </View>
   );
 }
@@ -52,7 +60,5 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     justifyContent: 'flex-start',
-    alignItems: 'center',
-    paddingTop: 30,
   },
 });

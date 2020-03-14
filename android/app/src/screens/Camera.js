@@ -67,7 +67,7 @@ export default function CameraComponent(props) {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.flipButton} onPress={() => flipCamera()}>
-        <Icon name="md-reverse-camera" size={40} />
+        <Icon name="md-reverse-camera" size={40} color={'white'} />
       </TouchableOpacity>
       <RNCamera
         ref={ref => {
@@ -82,12 +82,6 @@ export default function CameraComponent(props) {
         <TouchableOpacity onPress={() => takePicture()} style={styles.capture}>
           <MatIcon name="camera" size={70} />
         </TouchableOpacity>
-      </View>
-      <View style={styles.backButton}>
-        <Button
-          onPress={() => props.navigation.navigate('Home')}
-          title="back"
-        />
       </View>
     </View>
   );
@@ -112,12 +106,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(144,144,144, .5)',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  backButton: {
-    position: 'absolute',
-    bottom: 10,
-    left: 10,
-    zIndex: 1,
   },
   flipButton: {
     position: 'absolute',

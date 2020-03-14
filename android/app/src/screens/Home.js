@@ -37,7 +37,10 @@ export default function Home(props) {
         } else {
           newMarkers.push(newMarker);
         }
-        dispatch(appActions.setSelectedMarker(null));
+        if (change.type === 'removed' || change.type === 'added') {
+          dispatch(appActions.setSelectedMarker(null));
+        }
+
         let uniq = {};
         // For dev only - remove identical markers so hot module refresh doesn't show key value warnings
         var arrFiltered = newMarkers.filter(
