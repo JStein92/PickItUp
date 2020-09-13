@@ -182,7 +182,6 @@ const triggerStyles = {
     color: 'black',
     fontSize: 24,
     transform: [{rotate: '90deg'}],
-    transformOrigin: 'left top 0',
     fontWeight: 'bold',
   },
   triggerWrapper: {

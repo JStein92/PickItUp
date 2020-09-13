@@ -7,6 +7,7 @@ import Home from './android/app/src/screens/Home';
 import EditPost, {EditPostDetails} from './android/app/src/screens/EditPost';
 import PostDetails from './android/app/src/screens/PostDetails';
 import Camera from './android/app/src/screens/Camera';
+import Walk from './android/app/src/screens/Walk';
 import Profile from './android/app/src/screens/Profile';
 import Activity from './android/app/src/screens/Activity';
 // we will use these two screens later in our AppNavigator
@@ -35,6 +36,8 @@ import {
 } from './android/app/src/redux/actions/userAsyncActions';
 import {ThemeProvider} from 'react-native-elements';
 import {GoogleSigninButton} from '@react-native-community/google-signin';
+import {getPickups} from './android/app/src/redux/actions/appAsyncActions';
+
 let {setinitializing} = appActions;
 let {setUser} = userActions;
 const TabBarComponent = props => <MaterialTopTabBar {...props} />;
@@ -103,6 +106,12 @@ const RootStack = createStackNavigator(
         title: 'Take Picture',
       },
     },
+    Walk: {
+      screen: Walk,
+      navigationOptions: {
+        title: 'Pickup Trash on a Walk',
+      },
+    },
   },
   {
     mode: 'modal',
@@ -136,12 +145,20 @@ function App(props) {
     return subscriber; // unsubscribe on unmount
   }, []);
 
+  function handleNavigationChange(e) {
+    dispatch(getPickups());
+  }
+
+  // eslint-disable-next-line curly
   if (initializing) return null; // TODO add loader
 
   if (user && user.email) {
     return (
       <MenuProvider>
-        <AppContainer {...props} />
+        <AppContainer
+          {...props}
+          onNavigationStateChange={handleNavigationChange}
+        />
       </MenuProvider>
     );
   } else {

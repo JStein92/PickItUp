@@ -4,8 +4,10 @@ import {handleActions} from 'redux-actions';
 export const appInitialState = {
   initializing: false,
   currentImage: null,
+  markers: [],
   selectedMarker: null,
   followUserLocation: true,
+  isWalking: false,
 };
 
 const reducerMap = {
@@ -27,10 +29,22 @@ const reducerMap = {
       selectedMarker: action.payload,
     };
   },
+  [actions.setMarkers]: (state, action) => {
+    return {
+      ...state,
+      markers: [...action.payload],
+    };
+  },
   [actions.setFollowUserLocation]: (state, action) => {
     return {
       ...state,
       followUserLocation: action.payload,
+    };
+  },
+  [actions.setIsWalking]: (state, action) => {
+    return {
+      ...state,
+      isWalking: action.payload,
     };
   },
 };

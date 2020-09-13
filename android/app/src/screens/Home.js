@@ -1,54 +1,29 @@
 import React, {useState, useEffect, useContext} from 'react';
-import {StyleSheet, TouchableOpacity, View} from 'react-native';
+import {StyleSheet, TouchableOpacity, View, Alert} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import appActions from '../redux/actions/app';
+import userActions from '../redux/actions/user';
+import {getPickups} from '../redux/actions/appAsyncActions';
 import Map from './Map';
-import firestore from '@react-native-firebase/firestore';
-import getBoundsByRegion from '../Util/getBoundsByRegion';
 import PickupCard from '../components/PickupCard';
 import Icon from 'react-native-vector-icons/dist/Feather';
-import {ThemeContext, Button} from 'react-native-elements';
+import FAIcons from 'react-native-vector-icons/dist/FontAwesome5';
+import {ThemeContext} from 'react-native-elements';
 import MapMarker from '../components/MapMarker';
+import Geolocation from 'react-native-geolocation-service';
 
 export default function Home(props) {
   const dispatch = useDispatch();
-  const [markers, setMarkers] = useState([]);
   const [markerNodes, setMarkerNodes] = useState([]);
   const [currentRegion, setCurrentRegion] = useState(null);
   const {theme} = useContext(ThemeContext);
   const {selectedMarker} = useSelector(state => state.app);
-  const pickupsRef = firestore().collection('pickups');
+  const {markers} = useSelector(state => state.app);
+  const {isWalking} = useSelector(state => state.app);
+  const {coordinates} = useSelector(state => state.user);
 
   useEffect(() => {
-    return pickupsRef.onSnapshot(querySnapshot => {
-      let newMarkers = [];
-      querySnapshot.docChanges().forEach(change => {
-        // new markers is added, so we append it to the array
-        let pickupData = change.doc.data();
-        let newMarker = {
-          pickupData,
-          id: change.doc.id,
-        };
-
-        if (change.type === 'removed') {
-          // remove from markers showing
-          newMarkers = newMarkers.filter(marker => marker.id !== newMarker.id);
-          dispatch(appActions.setSelectedMarker(null));
-        } else {
-          newMarkers.push(newMarker);
-        }
-        if (change.type === 'removed' || change.type === 'added') {
-          dispatch(appActions.setSelectedMarker(null));
-        }
-
-        let uniq = {};
-        // For dev only - remove identical markers so hot module refresh doesn't show key value warnings
-        var arrFiltered = newMarkers.filter(
-          obj => !uniq[obj.id] && (uniq[obj.id] = true),
-        );
-        setMarkers(arrFiltered);
-      });
-    });
+    dispatch(getPickups());
   }, []);
 
   // let bounds = getBoundsByRegion(currentRegion);
@@ -76,11 +51,47 @@ export default function Home(props) {
     });
 
     setMarkerNodes(m);
-  }, [markers]);
+  }, [markers, props]);
+
+  useEffect(() => {
+    let timer;
+    if (isWalking) {
+      timer = setInterval(() => {
+        addCoordinate();
+      }, 5000);
+    }
+    return () => {
+      clearInterval(timer);
+    };
+  }, [isWalking]);
+
+  function addCoordinate() {
+    Geolocation.getCurrentPosition(
+      position => {
+        // If position is different enough from previous, add it to array
+        dispatch(
+          userActions.addCoordinate({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          }),
+        );
+      },
+      error => {
+        // See error code charts below.
+        console.log(error.code, error.message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 10000,
+      },
+    );
+  }
 
   return (
     <View style={styles.container}>
       <Map
+        coordinates={coordinates}
         markers={markerNodes}
         onRegionChangeComplete={newRegion => setCurrentRegion(newRegion)}
         delesectMarkers={() => dispatch(appActions.setSelectedMarker(null))}
@@ -94,17 +105,91 @@ export default function Home(props) {
           pickup={selectedMarker}
         />
       ) : null}
-      <TouchableOpacity
-        onPress={() => props.navigation.navigate('Camera')}
-        style={[
-          {
-            backgroundColor: theme.colors.secondary,
-            elevation: 10,
-          },
-          styles.bottomRightBtn,
-        ]}>
-        <Icon name="camera" size={30} color={'white'} />
-      </TouchableOpacity>
+      {!isWalking ? (
+        <TouchableOpacity
+          onPress={() => props.navigation.navigate('Camera')}
+          style={[
+            {
+              backgroundColor: theme.colors.secondary,
+              elevation: 10,
+            },
+            styles.bottomRightBtn,
+          ]}>
+          <Icon name="camera" size={24} color={'white'} />
+        </TouchableOpacity>
+      ) : null}
+      {!isWalking ? (
+        <TouchableOpacity
+          onPress={() => {
+            Alert.alert(
+              'Start a Pickup Walk?',
+              'Record your walk and take a picture of your Pickups at the end!',
+              [
+                {
+                  text: 'Cancel',
+                  onPress: () => {},
+                },
+                {
+                  text: 'Start',
+                  onPress: () => {
+                    dispatch(appActions.setIsWalking(true));
+                    addCoordinate();
+                  },
+                  style: 'positive',
+                },
+              ],
+              {cancelable: true},
+            );
+          }}
+          style={[
+            {
+              backgroundColor: theme.colors.secondary,
+              elevation: 10,
+            },
+            styles.bottomRightBtn2,
+          ]}>
+          <FAIcons name="walking" size={24} color={'white'} />
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          onPress={() => {
+            Alert.alert(
+              'Done walking?',
+              'You can take a picture once you are done!',
+              [
+                {
+                  text: 'Discard this walk',
+                  onPress: () => {
+                    dispatch(appActions.setIsWalking(false));
+                  },
+                  style: 'cancel',
+                },
+                {
+                  text: 'Not yet',
+                  onPress: () => {},
+                },
+                {
+                  text: 'Yep, all done!',
+                  onPress: () => {
+                    addCoordinate();
+                    props.navigation.navigate('Camera');
+                    // TODO: Record a "walk", display a card for the walk, get walk distance
+                  },
+                  style: 'positive',
+                },
+              ],
+            );
+          }}
+          style={[
+            {
+              backgroundColor: theme.colors.secondary,
+              elevation: 10,
+            },
+            styles.bottomRightBtn2,
+          ]}>
+          <FAIcons name="check" size={30} color={'white'} />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -132,7 +217,24 @@ const styles = StyleSheet.create({
     bottom: '40%',
     right: 10,
     position: 'absolute',
-    padding: 20,
+    padding: 5,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 60,
+    height: 60,
+    borderRadius: 100,
+  },
+  bottomRightBtn2: {
+    bottom: '55%',
+    right: 10,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    padding: 5,
+    width: 60,
+    height: 60,
     borderRadius: 100,
   },
   bottomLeftBtn: {

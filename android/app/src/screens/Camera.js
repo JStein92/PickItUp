@@ -1,16 +1,9 @@
 import React, {useState} from 'react';
-import {
-  TouchableOpacity,
-  View,
-  StyleSheet,
-  Text,
-  Dimensions,
-} from 'react-native';
+import {TouchableOpacity, View, StyleSheet, Text} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {RNCamera} from 'react-native-camera';
 import appActions from '../redux/actions/app';
 import ImagePicker from 'react-native-image-crop-picker';
-import {Button} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/dist/Ionicons';
 import MatIcon from 'react-native-vector-icons/dist/MaterialIcons';
 import Geolocation from 'react-native-geolocation-service';
@@ -19,6 +12,7 @@ export default function CameraComponent(props) {
   let camera;
   const dispatch = useDispatch();
   let [type, setType] = useState(RNCamera.Constants.Type.back);
+  const {isWalking} = useSelector(state => state.app);
 
   const flipCamera = () => {
     if (type === RNCamera.Constants.Type.back) {
@@ -62,13 +56,14 @@ export default function CameraComponent(props) {
     );
   };
 
-  // TODO add way to crop image
+  console.log(isWalking);
 
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.flipButton} onPress={() => flipCamera()}>
         <Icon name="md-reverse-camera" size={40} color={'white'} />
       </TouchableOpacity>
+
       <RNCamera
         ref={ref => {
           camera = ref;
@@ -78,6 +73,13 @@ export default function CameraComponent(props) {
         captureAudio={false}
         flashMode={RNCamera.Constants.FlashMode.auto}
       />
+      <View style={{alignItems: 'center'}}>
+        {isWalking && (
+          <Text style={styles.walkingText}>
+            Take a picture to go with your walk!
+          </Text>
+        )}
+      </View>
       <View style={{alignItems: 'center'}}>
         <TouchableOpacity onPress={() => takePicture()} style={styles.capture}>
           <MatIcon name="camera" size={70} />
@@ -104,6 +106,17 @@ const styles = StyleSheet.create({
     elevation: 3,
     borderRadius: 100,
     backgroundColor: 'rgba(144,144,144, .5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  walkingText: {
+    position: 'absolute',
+    bottom: 0,
+    textAlign: 'center',
+    elevation: 1,
+    padding: 7,
+    width: '100%',
+    backgroundColor: 'rgba(250,250,250, .5)',
     justifyContent: 'center',
     alignItems: 'center',
   },

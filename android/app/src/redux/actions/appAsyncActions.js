@@ -4,6 +4,35 @@ import storage from '@react-native-firebase/storage';
 import store from '../index';
 import uuid from 'uuid/v4'; // Import UUID to generate UUID
 import {ToastAndroid} from 'react-native';
+import appActions from '../actions/app';
+
+export function getPickups() {
+  return async function(dispatch) {
+    const pickups = firestore().collection('pickups');
+
+    const snapshot = await pickups.get();
+    let newMarkers = [];
+
+    snapshot.forEach(doc => {
+      let pickupData = doc.data();
+      let newMarker = {
+        pickupData,
+        id: doc.id,
+      };
+
+      newMarkers.push(newMarker);
+    });
+
+    let uniq = {};
+    // For dev only - remove identical markers so hot module refresh doesn't show key value warnings
+    var arrFiltered = newMarkers.filter(
+      obj => !uniq[obj.id] && (uniq[obj.id] = true),
+    );
+
+    dispatch(appActions.setMarkers(arrFiltered));
+    dispatch(appActions.setSelectedMarker(null));
+  };
+}
 
 export function likePickup(id) {
   return async function(dispatch) {
@@ -54,9 +83,11 @@ export function deletePickup(id) {
         .delete()
         .then(() => {
           ToastAndroid.show('Pickup deleted!', ToastAndroid.SHORT);
+          dispatch(getPickups());
         });
     } catch (err) {
       console.warn('could not delete', err);
+      dispatch(getPickups());
     }
   };
 }
@@ -85,13 +116,10 @@ export function addOrUpdatePickup() {
       function(snapshot) {
         // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
         var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log('Upload is ' + progress + '% done');
         switch (snapshot.state) {
           case firebase.storage.TaskState.PAUSED: // or 'paused'
-            console.log('Upload is paused');
             break;
           case firebase.storage.TaskState.RUNNING: // or 'running'
-            console.log('Upload is running');
             break;
         }
       },
@@ -118,8 +146,8 @@ export function addOrUpdatePickup() {
           .child(`pickupImages/${filename}`)
           .getDownloadURL()
           .then(function(downloadURL) {
-            console.log('File available at', downloadURL);
             addToDB(downloadURL);
+            dispatch(getPickups());
           });
       },
     );

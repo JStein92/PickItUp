@@ -4,6 +4,7 @@ import {handleActions} from 'redux-actions';
 export const userInitialState = {
   user: {},
   location: null,
+  coordinates: [],
 };
 
 const reducerMap = {
@@ -17,6 +18,20 @@ const reducerMap = {
     return {
       ...state,
       location: action.payload,
+    };
+  },
+  [actions.addCoordinate]: (state, action) => {
+    const newArr = Array.from(state.coordinates);
+    newArr.push(action.payload);
+    return {
+      ...state,
+      coordinates: newArr,
+    };
+  },
+  [actions.deleteCoordinates]: (state, action) => {
+    return {
+      ...state,
+      coordinates: [],
     };
   },
 };

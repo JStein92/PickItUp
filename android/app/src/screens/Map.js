@@ -9,9 +9,11 @@ import {Button} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/dist/MaterialIcons';
 import appActions from '../redux/actions/app';
 import MapView from 'react-native-map-clustering';
+import {Polyline} from 'react-native-maps';
+import {getPickups} from '../redux/actions/appAsyncActions';
 
 export default function Map(props) {
-  let {onRegionChangeComplete, markers, delesectMarkers} = props;
+  let {onRegionChangeComplete, markers, delesectMarkers, coordinates} = props;
   const dispatch = useDispatch();
 
   const {location} = useSelector(state => state.user);
@@ -142,11 +144,28 @@ export default function Map(props) {
             longitudeDelta: defaultZoom,
           }}>
           {markers}
+          <Polyline
+            strokeWidth={2}
+            lineCap="square"
+            strokeColor={'green'}
+            coordinates={coordinates}
+          />
         </MapView>
       ) : (
         // TODO: show loader
         <Text>getting location...</Text>
       )}
+      <View style={styles.refresh}>
+        <Button
+          buttonStyle={{
+            backgroundColor: 'white',
+            borderRadius: 100,
+            elevation: 2,
+          }}
+          onPress={() => dispatch(getPickups())}
+          icon={<Icon name="refresh" size={25} color={'black'} />}
+        />
+      </View>
       {location && !followUserLocation ? (
         <View style={styles.resetLocation}>
           <Button
@@ -190,6 +209,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 15,
     top: 15,
+  },
+  refresh: {
+    position: 'absolute',
+    left: '48%',
+    bottom: 15,
   },
   map: {
     ...StyleSheet.absoluteFillObject,
