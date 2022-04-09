@@ -21,7 +21,7 @@
     "axios": "^0.19.0",
     "firebase": "^7.3.0",
     "formik": "^2.0.6",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "path": "^0.12.7",
     "react": "16.9.0",
     "react-feather": "^2.0.3",
